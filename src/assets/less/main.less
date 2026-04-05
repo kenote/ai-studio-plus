@@ -1,0 +1,49 @@
+/** main.less */
+
+html {
+  height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  height: inherit;
+  margin: 0;
+}
+
+#app {
+  height: inherit;
+  font-family:
+    Google Sans Flex,
+    Google Sans,
+    Helvetica Neue,
+    sans-serif;
+}
+
+* {
+  scrollbar-width: initial;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+  color: inherit;
+}
