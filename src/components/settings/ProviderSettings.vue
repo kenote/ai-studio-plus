@@ -47,7 +47,7 @@
             <el-button link size="small" @click="cancelProvider(row)">取消</el-button>
           </template>
           <template v-else>
-            <el-button type="primary" link size="small" @click="row.editing = true">编辑</el-button>
+            <el-button type="primary" link size="small" @click="editProvider(row)">编辑</el-button>
             <el-button
               type="warning"
               link
@@ -124,7 +124,7 @@
                     <el-button link size="small" @click="cancelGroup(groupRow)">取消</el-button>
                   </template>
                   <template v-else>
-                    <el-button type="primary" link size="small" @click="groupRow.editing = true"
+                    <el-button type="primary" link size="small" @click="editGroup(groupRow)"
                       >编辑</el-button
                     >
                     <el-button type="danger" link size="small" @click="deleteGroup(groupRow)"
@@ -186,6 +186,14 @@ const addProvider = () => {
     ElMessage.warning('请先保存当前新建行')
     return
   }
+  const editingProvider = providers.value.find((p) => p.editing && p.id !== 0)
+  if (editingProvider) {
+    editingProvider.editing = false
+  }
+  const editingGroup = groups.value.find((g) => g.editing)
+  if (editingGroup) {
+    editingGroup.editing = false
+  }
   expandedRows.value = []
   providers.value.push({
     id: 0,
@@ -193,6 +201,22 @@ const addProvider = () => {
     apiBase: '',
     editing: true,
   })
+}
+
+const editProvider = (row: IProvider) => {
+  const editingProvider = providers.value.find((p) => p.editing && p.id !== 0)
+  if (editingProvider && editingProvider.id !== row.id) {
+    editingProvider.editing = false
+  }
+  const newProvider = providers.value.find((p) => p.id === 0)
+  if (newProvider) {
+    providers.value = providers.value.filter((p) => p.id !== 0)
+  }
+  const newGroup = groups.value.find((g) => g.id === 0)
+  if (newGroup) {
+    groups.value = groups.value.filter((g) => g.id !== 0)
+  }
+  row.editing = true
 }
 
 const saveProvider = async (row: IProvider) => {
@@ -233,6 +257,18 @@ const addGroup = (row: IProvider) => {
     ElMessage.warning('请先保存当前新建密钥')
     return
   }
+  const editingProvider = providers.value.find((p) => p.editing && p.id !== 0)
+  if (editingProvider) {
+    editingProvider.editing = false
+  }
+  const editingGroup = groups.value.find((g) => g.editing && g.id !== 0)
+  if (editingGroup) {
+    editingGroup.editing = false
+  }
+  const newProvider = providers.value.find((p) => p.id === 0)
+  if (newProvider) {
+    providers.value = providers.value.filter((p) => p.id !== 0)
+  }
   groups.value.push({
     id: 0,
     name: '',
@@ -240,6 +276,26 @@ const addGroup = (row: IProvider) => {
     providerId: row.id!,
     editing: true,
   })
+}
+
+const editGroup = (row: IGroup) => {
+  const editingProvider = providers.value.find((p) => p.editing && p.id !== 0)
+  if (editingProvider) {
+    editingProvider.editing = false
+  }
+  const editingGroup = groups.value.find((g) => g.editing && g.id !== 0)
+  if (editingGroup && editingGroup.id !== row.id) {
+    editingGroup.editing = false
+  }
+  const newProvider = providers.value.find((p) => p.id === 0)
+  if (newProvider) {
+    providers.value = providers.value.filter((p) => p.id !== 0)
+  }
+  const newGroup = groups.value.find((g) => g.id === 0)
+  if (newGroup) {
+    groups.value = groups.value.filter((g) => g.id !== 0)
+  }
+  row.editing = true
 }
 
 const saveGroup = async (row: Group & { editing?: boolean }) => {

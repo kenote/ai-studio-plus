@@ -14,7 +14,7 @@ export class AppDatabase extends Dexie {
     this.version(1).stores({
       providers: '++id, name',
       groups: '++id, providerId, name',
-      models: '++id, providerId, groupId, pid',
+      models: '++id, providerId, groupId',
       chats: '++id, title, createdAt, updatedAt',
       messages: '++id, chatId, role, createdAt',
     })

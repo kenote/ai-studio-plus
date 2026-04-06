@@ -18,9 +18,9 @@ export interface Group {
 /** 模型 */
 export declare interface Model {
   id?: number
-  pid: string
   name: string
-  providerId: number
-  groupId: number
+  providerId?: number
+  groupId?: number
   type: ('chat' | 'image' | 'ocr' | 'video' | 'audio')[]
+  editing?: boolean
 }
