@@ -5,7 +5,28 @@
       <el-button type="primary" @click="addModel()">添加模型</el-button>
     </div>
 
-    <el-table :data="models" stripe row-key="id">
+    <div class="flex items-center gap-2">
+      <el-input v-model="filterName" placeholder="搜索模型名称" clearable class="w-[160px]" />
+      <el-select v-model="filterGroupId" placeholder="供应商分组" clearable class="!w-[240px]">
+        <el-option-group v-for="p in providers" :key="p.id" :label="p.name">
+          <el-option
+            v-for="g in groups.filter((g) => g.providerId === p.id)"
+            :key="g.id"
+            :label="`${p.name} - ${g.name}`"
+            :value="g.id"
+          />
+        </el-option-group>
+      </el-select>
+      <el-select v-model="filterType" placeholder="类型" clearable class="!w-[160px]">
+        <el-option label="对话" value="chat" />
+        <el-option label="图像" value="image" />
+        <el-option label="OCR" value="ocr" />
+        <el-option label="视频" value="video" />
+        <el-option label="音频" value="audio" />
+      </el-select>
+    </div>
+
+    <el-table ref="tableRef" :data="filteredModels" stripe row-key="id" max-height="400">
       <el-table-column prop="name" label="模型" min-width="150">
         <template #default="{ row }">
           <el-input v-if="row.id === 0" v-model="row.name" placeholder="输入名称" size="small" />
@@ -76,12 +97,15 @@
       </el-table-column>
     </el-table>
 
-    <el-empty v-if="!models.length" description="暂无模型，请添加" />
+    <el-empty
+      v-if="!filteredModels.length"
+      :description="filterName || filterGroupId || filterType ? '无匹配模型' : '暂无模型，请添加'"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
@@ -93,6 +117,20 @@ const models = ref<IModel[]>([])
 const providers = ref<Provider[]>([])
 const groups = ref<Group[]>([])
 const { copy: copyText } = useClipboard()
+const filterName = ref('')
+const filterGroupId = ref<number | undefined>(undefined)
+const filterType = ref<string | undefined>(undefined)
+const tableRef = ref()
+
+const filteredModels = computed(() => {
+  return models.value.filter((m) => {
+    if (filterName.value && !m.name.toLowerCase().includes(filterName.value.toLowerCase()))
+      return false
+    if (filterGroupId.value && m.groupId !== filterGroupId.value) return false
+    if (filterType.value && !m.type.includes(filterType.value as 'chat')) return false
+    return true
+  })
+})
 
 const loadData = async () => {
   models.value = await db.models.toArray()
@@ -148,6 +186,9 @@ const addModel = () => {
     editing: true,
   }
   models.value.push(newModel)
+  nextTick(() => {
+    tableRef.value?.scrollToRow(newModel)
+  })
 }
 
 const editModel = (row: IModel) => {

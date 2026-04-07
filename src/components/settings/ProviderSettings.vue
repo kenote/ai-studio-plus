@@ -5,10 +5,13 @@
       <el-button type="primary" @click="addProvider()">添加供应商</el-button>
     </div>
 
+    <ModelDialog v-model:model-visible="modelDialogVisible" :group-id="currentGroupId" />
+
     <el-table
       :data="providers"
       stripe
       row-key="id"
+      max-height="440"
       :expand-row-keys="expandedRows"
       :row-class-name="tableRowClassName"
       @expand-change="handleExpand"
@@ -115,7 +118,7 @@
                   </div>
                 </template>
               </el-table-column>
-              <el-table-column label="操作" width="120">
+              <el-table-column label="操作" width="180">
                 <template #default="{ row: groupRow }">
                   <template v-if="groupRow.editing">
                     <el-button type="primary" link size="small" @click="saveGroup(groupRow)"
@@ -126,6 +129,9 @@
                   <template v-else>
                     <el-button type="primary" link size="small" @click="editGroup(groupRow)"
                       >编辑</el-button
+                    >
+                    <el-button type="info" link size="small" @click="openModel(groupRow)"
+                      >模型</el-button
                     >
                     <el-button type="danger" link size="small" @click="deleteGroup(groupRow)"
                       >删除</el-button
@@ -150,6 +156,7 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Provider, Group } from '@/types/provider'
+import ModelDialog from './ModelDialog.vue'
 
 type IProvider = Provider & { editing?: boolean }
 type IGroup = Group & { editing?: boolean }
@@ -157,6 +164,8 @@ type IGroup = Group & { editing?: boolean }
 const providers = ref<IProvider[]>([])
 const groups = ref<IGroup[]>([])
 const currentId = ref(0)
+const modelDialogVisible = ref(false)
+const currentGroupId = ref<number | undefined>(undefined)
 const expandedRows = ref<string[]>([])
 const showApiKey = ref<Record<number, boolean>>({})
 const { copy: copyText } = useClipboard()
@@ -363,6 +372,11 @@ const copyApiKey = async (text: string) => {
   } catch {
     ElMessage.error('复制失败')
   }
+}
+
+const openModel = (row: IGroup) => {
+  currentGroupId.value = row.id
+  modelDialogVisible.value = true
 }
 </script>
 

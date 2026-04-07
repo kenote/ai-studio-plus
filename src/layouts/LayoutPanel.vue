@@ -88,6 +88,7 @@
               @click="activeMenu = 'provider'"
             >
               供应商
+              <span class="text-xs text-zinc-400">({{ providerCount }})</span>
             </li>
             <li
               class="ml-0 px-3 py-2 rounded cursor-pointer text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -95,6 +96,7 @@
               @click="activeMenu = 'model'"
             >
               模型
+              <span class="text-xs text-zinc-400">({{ modelCount }})</span>
             </li>
           </ul>
         </aside>
@@ -114,13 +116,22 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import ProviderSettings from '@/components/settings/ProviderSettings.vue'
 import ModelSettings from '@/components/settings/ModelSettings.vue'
+import { db } from '@/db'
 
 const showSettings = ref(false)
 const activeMenu = ref('general')
+const providerCount = ref(0)
+const modelCount = ref(0)
 
-const openSettings = () => {
+const loadCounts = async () => {
+  providerCount.value = await db.providers.count()
+  modelCount.value = await db.models.count()
+}
+
+const openSettings = async () => {
   activeMenu.value = 'general'
   showSettings.value = true
+  await loadCounts()
 }
 </script>
 
