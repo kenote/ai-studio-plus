@@ -15,6 +15,7 @@ export declare interface FilterTable<T = string> {
 
 /** 映射关系 */
 export declare interface Mapping {
+  id?: number
   source: string
   destination: string
 }

@@ -5,7 +5,7 @@
       <el-button type="primary" @click="addFilter">添加规则</el-button>
     </div>
 
-    <el-table ref="tableRef" :data="filterTable" stripe row-key="id" max-height="400">
+    <el-table ref="tableRef" :data="filterTable" stripe row-key="id" max-height="454">
       <el-table-column label="名称" width="120">
         <template #default="{ row }">
           <el-input v-if="row.editing" v-model="row.name" placeholder="输入名称" size="small" />

@@ -11,7 +11,7 @@
       :data="providers"
       stripe
       row-key="id"
-      max-height="440"
+      max-height="454"
       :expand-row-keys="expandedRows"
       :row-class-name="tableRowClassName"
       @expand-change="handleExpand"
