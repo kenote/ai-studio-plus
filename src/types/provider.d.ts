@@ -1,5 +1,5 @@
 // 供应商
-export interface Provider {
+export declare interface Provider {
   id?: number
   name: string
   apiBase: string
@@ -7,7 +7,7 @@ export interface Provider {
 }
 
 /** 模型分组 */
-export interface Group {
+export declare interface Group {
   id?: number
   name: string
   apiKey: string

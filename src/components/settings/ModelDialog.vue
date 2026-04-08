@@ -71,6 +71,7 @@ import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Model, Provider, Group } from '@/types/provider'
 import { orderBy } from 'lodash'
+import type { FilterTable } from '@/types/config'
 
 type IModel = Model & { editing?: boolean }
 
@@ -80,11 +81,6 @@ type RemoteModel = {
   created: number
   owned_by: string
 }
-
-const filterRegexp = [
-  { name: 'grok', regexp: /^(grok)-/ },
-  { name: 'qwen', regexp: /^(qwen|wan2|z-image)/ },
-]
 
 const props = defineProps<{
   modelVisible: boolean
@@ -100,6 +96,7 @@ const remoteModels = ref<IModel[]>([])
 const importedNames = ref<string[]>([])
 const loading = ref(false)
 const searchText = ref('')
+const filterTable = ref<FilterTable[]>([])
 
 const filteredModels = computed(() => {
   if (!searchText.value) return remoteModels.value
@@ -146,6 +143,7 @@ const loadData = async () => {
     const models = await db.models.where('groupId').equals(props.groupId).toArray()
     importedNames.value = models.map((m) => m.name)
   }
+  filterTable.value = await db.filters.toArray()
 }
 
 const fetchRemoteModels = async () => {
@@ -166,7 +164,7 @@ const fetchRemoteModels = async () => {
       fillterName = currentProvider.name.toLowerCase()
     }
     const regexp =
-      filterRegexp.find((v) => v.name == currentGroup?.name.toLowerCase())?.regexp ??
+      filterTable.value.find((v) => v.name == currentGroup?.name.toLowerCase())?.regexp ??
       new RegExp(`^(${fillterName})`)
     const data =
       (<RemoteModel[]>response.data.data).filter(

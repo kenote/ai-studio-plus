@@ -81,6 +81,13 @@
             >
               通用
             </li>
+            <li
+              class="ml-0 px-3 py-2 rounded cursor-pointer text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              :class="activeMenu === 'filter' ? 'bg-zinc-100 dark:bg-zinc-800' : ''"
+              @click="activeMenu = 'filter'"
+            >
+              名称过滤
+            </li>
             <li class="ml-0 px-1 py-2 text-sm font-900">服务器</li>
             <li
               class="ml-0 px-3 py-2 rounded cursor-pointer text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -102,6 +109,7 @@
         </aside>
         <main class="flex-1 pl-4">
           <GeneralSettings v-if="activeMenu === 'general'" />
+          <NameFilterSettings v-else-if="activeMenu === 'filter'" />
           <ProviderSettings v-else-if="activeMenu === 'provider'" />
           <ModelSettings v-else-if="activeMenu === 'model'" />
         </main>
@@ -114,6 +122,7 @@
 import { ref } from 'vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
+import NameFilterSettings from '@/components/settings/NameFilterSettings.vue'
 import ProviderSettings from '@/components/settings/ProviderSettings.vue'
 import ModelSettings from '@/components/settings/ModelSettings.vue'
 import { db } from '@/db'

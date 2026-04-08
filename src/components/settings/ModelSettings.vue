@@ -105,7 +105,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
@@ -185,10 +185,7 @@ const addModel = () => {
     type: ['chat'],
     editing: true,
   }
-  models.value.push(newModel)
-  nextTick(() => {
-    tableRef.value?.scrollToRow(newModel)
-  })
+  models.value.unshift(newModel)
 }
 
 const editModel = (row: IModel) => {

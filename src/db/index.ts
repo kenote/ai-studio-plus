@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type { Provider, Group, Model } from '@/types/provider'
 import type { Chat, Message } from '@/types/chat'
+import type { Config, FilterTable } from '@/types/config'
 
 export class AppDatabase extends Dexie {
   providers!: Table<Provider>
@@ -8,6 +9,8 @@ export class AppDatabase extends Dexie {
   models!: Table<Model>
   chats!: Table<Chat>
   messages!: Table<Message>
+  config!: Table<Config>
+  filters!: Table<FilterTable>
 
   constructor() {
     super('ai-studio-plus')
@@ -17,6 +20,8 @@ export class AppDatabase extends Dexie {
       models: '++id, providerId, groupId',
       chats: '++id, title, createdAt, updatedAt',
       messages: '++id, chatId, role, createdAt',
+      config: 'id',
+      filters: '++id, name, regexp',
     })
   }
 }
