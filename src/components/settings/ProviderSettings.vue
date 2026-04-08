@@ -157,6 +157,7 @@ import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Provider, Group } from '@/types/provider'
 import ModelDialog from './ModelDialog.vue'
+import { emitter, Events } from '@/utils/emitter'
 
 type IProvider = Provider & { editing?: boolean }
 type IGroup = Group & { editing?: boolean }
@@ -173,6 +174,7 @@ const { copy: copyText } = useClipboard()
 const loadProviders = async () => {
   providers.value = await db.providers.toArray()
   groups.value = await db.groups.toArray()
+  emitter.emit(Events.PROVIDER_COUNT_CHANGE)
 }
 
 const tableRowClassName = ({ row }: { row: IProvider }) => {
@@ -329,10 +331,6 @@ const cancelGroup = async (row: Group & { editing?: boolean }) => {
     loadProviders()
   }
 }
-
-// const editGroup = (row: Group) => {
-//   row.editing = true
-// }
 
 const deleteGroup = async (row: Group) => {
   try {

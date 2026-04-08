@@ -12,22 +12,22 @@
           <span v-else>{{ row.name }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="正则表达式" min-width="200">
+      <el-table-column label="过滤格式（正则）" min-width="200">
         <template #default="{ row }">
           <el-input
             v-if="row.editing"
-            v-model="row.regexp"
+            v-model="row.pattern"
             placeholder="输入正则表达式"
             size="small"
           />
           <div v-else class="flex items-center gap-1">
-            <span class="font-mono text-blue-600 dark:text-blue-400">{{ row.regexp }}</span>
+            <span class="font-mono text-blue-600 dark:text-blue-400">{{ row.pattern }}</span>
             <el-button
               type="primary"
               link
               size="small"
               title="复制"
-              @click.stop="copyRegexp(row.regexp!)"
+              @click.stop="copyPattern(row.pattern!)"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -65,19 +65,18 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import { db } from '@/db'
 import type { FilterTable } from '@/types/config'
 
-type IFilterTable = FilterTable<string> & { editing?: boolean }
+type IFilterTable = FilterTable<string>
 
 const filterTable = ref<IFilterTable[]>([])
 const tableRef = ref()
 
-const copyRegexp = async (regexp: string) => {
-  await navigator.clipboard.writeText(regexp)
+const copyPattern = async (pattern: string) => {
+  await navigator.clipboard.writeText(pattern)
   ElMessage.success('已复制')
 }
 
 const loadData = async () => {
-  const filters = await db.filters.toArray()
-  filterTable.value = filters.map((f) => ({ ...f, editing: false, regexp: f.regexp?.source }))
+  filterTable.value = await db.filters.toArray()
 }
 
 const addFilter = () => {
@@ -89,7 +88,7 @@ const addFilter = () => {
   const newFilter: IFilterTable = {
     id: undefined,
     name: '',
-    regexp: '',
+    pattern: '',
     editing: true,
   }
   filterTable.value.unshift(newFilter)
@@ -108,9 +107,9 @@ const editFilter = (row: IFilterTable) => {
   row.editing = true
 }
 
-const validateRegexp = (regexp: string): boolean => {
+const validatePattern = (pattern: string): boolean => {
   try {
-    new RegExp(regexp)
+    new RegExp(pattern)
     return true
   } catch {
     return false
@@ -122,12 +121,12 @@ const saveFilter = async (row: IFilterTable) => {
     ElMessage.warning('请输入名称')
     return
   }
-  if (!row.regexp?.trim()) {
-    ElMessage.warning('请输入正则表达式')
+  if (!row.pattern?.trim()) {
+    ElMessage.warning('请输入过滤格式（正则）')
     return
   }
-  if (!validateRegexp(row.regexp)) {
-    ElMessage.warning('正则表达式格式无效')
+  if (!validatePattern(row.pattern)) {
+    ElMessage.warning('过滤格式（正则）格式无效')
     return
   }
 
@@ -138,9 +137,9 @@ const saveFilter = async (row: IFilterTable) => {
   }
 
   if (row.id === undefined) {
-    await db.filters.add({ name: row.name, regexp: new RegExp(row.regexp) })
+    await db.filters.add({ name: row.name, pattern: row.pattern })
   } else {
-    await db.filters.update(row.id, { name: row.name, regexp: new RegExp(row.regexp) })
+    await db.filters.update(row.id, { name: row.name, pattern: row.pattern })
   }
   loadData()
 }

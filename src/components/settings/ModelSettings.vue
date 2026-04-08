@@ -6,8 +6,20 @@
     </div>
 
     <div class="flex items-center gap-2">
-      <el-input v-model="filterName" placeholder="搜索模型名称" clearable class="w-[160px]" />
-      <el-select v-model="filterGroupId" placeholder="供应商分组" clearable class="!w-[240px]">
+      <el-input
+        v-model="filterName"
+        placeholder="搜索模型名称"
+        clearable
+        class="w-[160px]"
+        @change="changeFilter"
+      />
+      <el-select
+        v-model="filterGroupId"
+        placeholder="供应商分组"
+        clearable
+        class="!w-[240px]"
+        @change="changeFilter"
+      >
         <el-option-group v-for="p in providers" :key="p.id" :label="p.name">
           <el-option
             v-for="g in groups.filter((g) => g.providerId === p.id)"
@@ -17,7 +29,13 @@
           />
         </el-option-group>
       </el-select>
-      <el-select v-model="filterType" placeholder="类型" clearable class="!w-[160px]">
+      <el-select
+        v-model="filterType"
+        placeholder="类型"
+        clearable
+        class="!w-[160px]"
+        @change="changeFilter"
+      >
         <el-option label="对话" value="chat" />
         <el-option label="图像" value="image" />
         <el-option label="OCR" value="ocr" />
@@ -110,6 +128,7 @@ import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Provider, Group, Model } from '@/types/provider'
+import { emitter, Events } from '@/utils/emitter'
 
 type IModel = Model & { editing?: boolean }
 
@@ -132,10 +151,15 @@ const filteredModels = computed(() => {
   })
 })
 
+const changeFilter = () => {
+  models.value = models.value.filter((m) => m.id! > 0)
+}
+
 const loadData = async () => {
   models.value = await db.models.toArray()
   providers.value = await db.providers.toArray()
   groups.value = await db.groups.toArray()
+  emitter.emit(Events.MODEL_COUNT_CHANGE)
 }
 
 const getProviderAndGroup = (providerId: number, groupId: number) => {
@@ -173,6 +197,9 @@ const addModel = () => {
     ElMessage.warning('请先保存当前新建行')
     return
   }
+  filterName.value = ''
+  filterGroupId.value = undefined
+  filterType.value = undefined
   const editingRow = models.value.find((m) => m.editing && m.id !== 0)
   if (editingRow) {
     editingRow.editing = false

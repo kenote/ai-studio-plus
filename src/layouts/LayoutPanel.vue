@@ -119,13 +119,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import NameFilterSettings from '@/components/settings/NameFilterSettings.vue'
 import ProviderSettings from '@/components/settings/ProviderSettings.vue'
 import ModelSettings from '@/components/settings/ModelSettings.vue'
 import { db } from '@/db'
+import { emitter, Events } from '@/utils/emitter'
 
 const showSettings = ref(false)
 const activeMenu = ref('general')
@@ -142,6 +143,16 @@ const openSettings = async () => {
   showSettings.value = true
   await loadCounts()
 }
+
+onMounted(() => {
+  emitter.on(Events.PROVIDER_COUNT_CHANGE, loadCounts)
+  emitter.on(Events.MODEL_COUNT_CHANGE, loadCounts)
+})
+
+onUnmounted(() => {
+  emitter.off(Events.PROVIDER_COUNT_CHANGE, loadCounts)
+  emitter.off(Events.MODEL_COUNT_CHANGE, loadCounts)
+})
 </script>
 
 <style>

@@ -72,6 +72,7 @@ import { db } from '@/db'
 import type { Model, Provider, Group } from '@/types/provider'
 import { orderBy } from 'lodash'
 import type { FilterTable } from '@/types/config'
+import { emitter, Events } from '@/utils/emitter'
 
 type IModel = Model & { editing?: boolean }
 
@@ -144,6 +145,7 @@ const loadData = async () => {
     importedNames.value = models.map((m) => m.name)
   }
   filterTable.value = await db.filters.toArray()
+  emitter.emit(Events.MODEL_COUNT_CHANGE)
 }
 
 const fetchRemoteModels = async () => {
@@ -163,15 +165,13 @@ const fetchRemoteModels = async () => {
     if (['官方', 'official'].includes(currentGroup.name.toLowerCase())) {
       fillterName = currentProvider.name.toLowerCase()
     }
-    const regexp =
-      filterTable.value.find((v) => v.name == currentGroup?.name.toLowerCase())?.regexp ??
-      new RegExp(`^(${fillterName})`)
+    const pattern =
+      filterTable.value.find((v) => v.name == currentGroup?.name.toLowerCase())?.pattern ??
+      `^(${fillterName})`
     const data =
       (<RemoteModel[]>response.data.data).filter(
-        (v) => v.object === 'model' && regexp?.test(v.id),
+        (v) => v.object === 'model' && new RegExp(pattern)?.test(v.id),
       ) || []
-    console.log('fetch models', response.data.data)
-    console.log('fetch models', data)
     remoteModels.value = orderBy(
       data.map((m: { id: string }) => ({
         id: 0,
@@ -207,7 +207,7 @@ const getModelType = (modelId: string): 'chat' | 'image' | 'ocr' | 'video' | 'au
   if (id.includes('ocr') || id.includes('text')) {
     return 'ocr'
   }
-  if (id.includes('video') || id.includes('sora')) {
+  if (id.includes('video') || id.includes('sora') || id.includes('wan')) {
     return 'video'
   }
   if (
@@ -235,23 +235,16 @@ const isImported = (name: string) => {
 }
 
 const handleImportClick = async (row: IModel) => {
-  console.log(row)
-  const a = await db.models.where('groupId').equals(row.groupId!).toArray()
-  console.log(a.find((v) => v.name === row.name))
   if (isImported(row.name)) {
     const models = await db.models.where('groupId').equals(row.groupId!).toArray()
     const modelId = models.find((v) => v.name === row.name)?.id
     await db.models.delete(modelId!)
-    // const index = importedNames.value.indexOf(row.name)
-    // if (index > -1) {
-    //   importedNames.value.splice(index, 1) // 从索引处开始删除 1 个元素
-    //   ElMessage.success('移除模型 ' + row.name)
-    // }
     importedNames.value = importedNames.value.filter((v) => v !== row.name)
     ElMessage.warning('移除模型 ' + row.name)
   } else {
     importRemoteModel(row)
   }
+  emitter.emit(Events.MODEL_COUNT_CHANGE)
 }
 
 const importRemoteModel = async (row: IModel) => {
@@ -262,7 +255,6 @@ const importRemoteModel = async (row: IModel) => {
     type: [...row.type],
   })
   importedNames.value.push(row.name)
-  // remoteModels.value = remoteModels.value.filter((m) => m.name !== row.name)
   ElMessage.success('添加模型 ' + row.name)
 }
 </script>

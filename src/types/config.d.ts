@@ -6,10 +6,10 @@ export declare interface Config {
 }
 
 /** 名称过滤 */
-export declare interface FilterTable<T = Regexp> {
+export declare interface FilterTable<T = string> {
   id?: number
   name: string
-  regexp?: T
+  pattern?: T
   editing?: boolean
 }
 

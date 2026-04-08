@@ -1,7 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type { Provider, Group, Model } from '@/types/provider'
 import type { Chat, Message } from '@/types/chat'
-import type { Config, FilterTable } from '@/types/config'
+import type { Config, FilterTable, Mapping } from '@/types/config'
 
 export class AppDatabase extends Dexie {
   providers!: Table<Provider>
@@ -11,6 +11,7 @@ export class AppDatabase extends Dexie {
   messages!: Table<Message>
   config!: Table<Config>
   filters!: Table<FilterTable>
+  mappings!: Table<Mapping>
 
   constructor() {
     super('ai-studio-plus')
@@ -21,7 +22,8 @@ export class AppDatabase extends Dexie {
       chats: '++id, title, createdAt, updatedAt',
       messages: '++id, chatId, role, createdAt',
       config: 'id',
-      filters: '++id, name, regexp',
+      filters: '++id, name, pattern',
+      mappings: '++id, source',
     })
   }
 }
