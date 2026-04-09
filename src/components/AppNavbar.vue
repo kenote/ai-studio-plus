@@ -2,22 +2,22 @@
   <nav class="flex items-center gap-1 ml-6 text-sm">
     <router-link
       to="/chat"
-      class="p-[4px_8px] text-zinc-950 hover:bg-zinc-100 rounded-sm dark:hover:bg-zinc-800 m-1"
+      class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm m-1"
       >会话</router-link
     >
     <router-link
       to="/draw"
-      class="p-[4px_8px] text-zinc-950 hover:bg-zinc-100 rounded-sm dark:hover:bg-zinc-800 m-1"
+      class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm m-1"
       >绘画</router-link
     >
     <router-link
       to="/video"
-      class="p-[4px_8px] text-zinc-950 hover:bg-zinc-100 rounded-sm dark:hover:bg-zinc-800 m-1"
+      class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm m-1"
       >视频</router-link
     >
     <router-link
       to="/archive"
-      class="p-[4px_8px] text-zinc-950 hover:bg-zinc-100 rounded-sm dark:hover:bg-zinc-800 m-1"
+      class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm m-1"
       >归档库</router-link
     >
   </nav>

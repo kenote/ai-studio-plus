@@ -1,11 +1,13 @@
 <template>
   <el-container class="h-full">
-    <el-header class="flex items-center border-coolgray-300 border-b-solid border-b">
+    <el-header
+      class="flex items-center border-coolgray-300 border-b-solid border-b bg-white dark:bg-zinc-900 dark:border-zinc-800"
+    >
       <nav class="flex items-center h-12 w-stretch">
         <div class="flex flex-1 items-center">
           <span
             @click="() => console.log('ok')"
-            class="p-[4px_8px] text-zinc-950 hover:bg-zinc-100 rounded-sm dark:hover:bg-zinc-800 mr-4"
+            class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm mr-4"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -16,7 +18,9 @@
               />
             </svg>
           </span>
-          <router-link to="/" class="text-xl font-bold">Kemini</router-link>
+          <router-link to="/" class="text-xl font-bold text-zinc-950 dark:text-zinc-200"
+            >Kemini</router-link
+          >
           <!--  -->
           <app-navbar />
         </div>
@@ -29,7 +33,7 @@
           <span
             @click="openSettings"
             title="配置"
-            class="font-900 p-[4px_8px] text-zinc-950 hover:bg-zinc-100 rounded-sm dark:hover:bg-zinc-800"
+            class="font-900 p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -129,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import AppNavbar from '@/components/AppNavbar.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import NameFilterSettings from '@/components/settings/NameFilterSettings.vue'
@@ -138,11 +142,13 @@ import ProviderSettings from '@/components/settings/ProviderSettings.vue'
 import ModelSettings from '@/components/settings/ModelSettings.vue'
 import { db } from '@/db'
 import { emitter, Events } from '@/utils/emitter'
+import { usePreferredDark } from '@vueuse/core'
 
 const showSettings = ref(false)
 const activeMenu = ref('general')
 const providerCount = ref(0)
 const modelCount = ref(0)
+const isDark = usePreferredDark()
 
 const loadCounts = async () => {
   providerCount.value = await db.providers.count()
@@ -155,12 +161,29 @@ const openSettings = async () => {
   await loadCounts()
 }
 
+const applyTheme = async () => {
+  const { theme } = (await db.config.get(1)) ?? { theme: 'light' }
+  if (theme === 'auto') {
+    document.documentElement.classList.toggle('dark', isDark.value)
+  } else {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }
+}
+
 onMounted(() => {
+  applyTheme()
   emitter.on(Events.DATA_CHANGE, loadCounts)
 })
 
 onUnmounted(() => {
   emitter.off(Events.DATA_CHANGE, loadCounts)
+})
+
+watch(isDark, async (newVal) => {
+  const { theme } = (await db.config.get(1)) ?? { theme: 'light' }
+  if (theme === 'auto') {
+    document.documentElement.classList.toggle('dark', newVal)
+  }
 })
 </script>
 

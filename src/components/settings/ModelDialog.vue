@@ -4,7 +4,7 @@
       class="space-y-4 min-h-[460px]"
       v-loading="loading"
       element-loading-text="加载中..."
-      element-loading-background="rgba(255, 255, 255, 0.6)"
+      element-loading-background="rgba(255, 255, 255, 0)"
     >
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2 mr-2 w-full">

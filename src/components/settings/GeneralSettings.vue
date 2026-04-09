@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-6 pr-5 max-h-[525px]">
     <div
-      class="flex items-center justify-between position-sticky top-0 bg-white dark:bg-zinc-900 z-10"
+      class="flex items-center justify-between position-sticky top-0 bg-white dark:bg-[var(--el-dialog-bg-color)] z-10"
     >
       <h3 class="text-base font-medium">通用</h3>
     </div>
 
-    <div class="space-y-4 bg-coolgray-50 p-4 rounded">
+    <div class="space-y-4 bg-coolgray-50 dark:bg-zinc-800 p-4 rounded">
       <div class="flex items-center gap-2 justify-between">
         <span>主题</span>
         <el-form-item class="!mb-0 w-[120px]">
@@ -25,7 +25,7 @@
     </div>
 
     <div class="text-sm font-medium pl-4">归档</div>
-    <div class="space-y-4 bg-coolgray-50 p-4 rounded">
+    <div class="space-y-4 bg-coolgray-50 dark:bg-zinc-800 p-4 rounded">
       <div class="flex items-center gap-2 justify-between">
         <span>开启</span>
         <el-form-item class="!mb-0 w-[40px]">
@@ -66,7 +66,7 @@
     </div>
 
     <div class="text-sm font-medium">数据备份</div>
-    <div class="space-y-4 bg-coolgray-50 p-4 rounded">
+    <div class="space-y-4 bg-coolgray-50 dark:bg-zinc-800 p-4 rounded">
       <h3 class="text-sm font-medium">完整备份</h3>
       <div class="text-sm text-zinc-500">
         导入会清空现有数据并替换为文件中的数据。请谨慎操作，建议先导出数据进行备份。
@@ -110,8 +110,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { db } from '@/db'
 import type { Config } from '@/types/config'
 import { emitter, Events } from '@/utils/emitter'
+import { usePreferredDark } from '@vueuse/core'
 
 const fileInputRef = ref<HTMLInputElement>()
+const isDark = usePreferredDark()
 
 const configForm = reactive<Config>({
   theme: 'light',
@@ -141,6 +143,15 @@ const initConfig = async () => {
       joplin: { host: '', token: '', folder: '' },
     })
   }
+  applyTheme(configForm.theme)
+}
+
+const applyTheme = (theme: string) => {
+  if (theme === 'auto') {
+    document.documentElement.classList.toggle('dark', isDark.value)
+  } else {
+    document.documentElement.classList.toggle('dark', theme === 'dark')
+  }
 }
 
 const saveConfig = async () => {
@@ -158,13 +169,7 @@ const saveConfig = async () => {
 }
 
 const handleThemeChange = () => {
-  const theme = configForm.theme
-  if (theme === 'auto') {
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    document.documentElement.classList.toggle('dark', isDark)
-  } else {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
-  }
+  applyTheme(configForm.theme)
   saveConfig()
 }
 
@@ -186,6 +191,11 @@ const resetConfig = () => {
 onMounted(() => {
   initConfig()
   emitter.on(Events.DATA_CHANGE, resetConfig)
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (configForm.theme === 'auto') {
+      applyTheme('auto')
+    }
+  })
 })
 
 onUnmounted(() => {
