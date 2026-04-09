@@ -145,7 +145,7 @@ const loadData = async () => {
     importedNames.value = models.map((m) => m.name)
   }
   filterTable.value = await db.filters.toArray()
-  emitter.emit(Events.MODEL_COUNT_CHANGE)
+  emitter.emit(Events.DATA_CHANGE)
 }
 
 const fetchRemoteModels = async () => {
@@ -244,7 +244,7 @@ const handleImportClick = async (row: IModel) => {
   } else {
     importRemoteModel(row)
   }
-  emitter.emit(Events.MODEL_COUNT_CHANGE)
+  emitter.emit(Events.DATA_CHANGE)
 }
 
 const importRemoteModel = async (row: IModel) => {

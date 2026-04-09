@@ -114,12 +114,14 @@
             </li>
           </ul>
         </aside>
-        <main class="flex-1 pl-4 max-w-[750px]">
-          <GeneralSettings v-if="activeMenu === 'general'" />
-          <NameFilterSettings v-else-if="activeMenu === 'filter'" />
-          <MappingSettings v-else-if="activeMenu === 'mapping'" />
-          <ProviderSettings v-else-if="activeMenu === 'provider'" />
-          <ModelSettings v-else-if="activeMenu === 'model'" />
+        <main class="flex-1 pl-4 max-w-[750px] position-relative">
+          <el-scrollbar>
+            <GeneralSettings v-if="activeMenu === 'general'" />
+            <NameFilterSettings v-else-if="activeMenu === 'filter'" />
+            <MappingSettings v-else-if="activeMenu === 'mapping'" />
+            <ProviderSettings v-else-if="activeMenu === 'provider'" />
+            <ModelSettings v-else-if="activeMenu === 'model'" />
+          </el-scrollbar>
         </main>
       </div>
     </div>
@@ -154,13 +156,11 @@ const openSettings = async () => {
 }
 
 onMounted(() => {
-  emitter.on(Events.PROVIDER_COUNT_CHANGE, loadCounts)
-  emitter.on(Events.MODEL_COUNT_CHANGE, loadCounts)
+  emitter.on(Events.DATA_CHANGE, loadCounts)
 })
 
 onUnmounted(() => {
-  emitter.off(Events.PROVIDER_COUNT_CHANGE, loadCounts)
-  emitter.off(Events.MODEL_COUNT_CHANGE, loadCounts)
+  emitter.off(Events.DATA_CHANGE, loadCounts)
 })
 </script>
 

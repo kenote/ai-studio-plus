@@ -123,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
@@ -159,7 +159,7 @@ const loadData = async () => {
   models.value = await db.models.toArray()
   providers.value = await db.providers.toArray()
   groups.value = await db.groups.toArray()
-  emitter.emit(Events.MODEL_COUNT_CHANGE)
+  emitter.emit(Events.DATA_CHANGE)
 }
 
 const getProviderAndGroup = (providerId: number, groupId: number) => {
@@ -213,6 +213,10 @@ const addModel = () => {
     editing: true,
   }
   models.value.unshift(newModel)
+  nextTick(() => {
+    tableRef.value?.setCurrentRow(newModel)
+    tableRef.value?.scrollTo(0, 0)
+  })
 }
 
 const editModel = (row: IModel) => {

@@ -174,7 +174,7 @@ const { copy: copyText } = useClipboard()
 const loadProviders = async () => {
   providers.value = await db.providers.toArray()
   groups.value = await db.groups.toArray()
-  emitter.emit(Events.PROVIDER_COUNT_CHANGE)
+  emitter.emit(Events.DATA_CHANGE)
 }
 
 const tableRowClassName = ({ row }: { row: IProvider }) => {

@@ -3,6 +3,14 @@ export declare interface Config {
   id?: number
   /** 主题 */
   theme: 'light' | 'dark' | 'auto'
+  /** 开启归档 */
+  archive: boolean
+  /** Joplin 配置 */
+  joplin: {
+    host?: string
+    token: string
+    folder?: string
+  }
 }
 
 /** 名称过滤 */
