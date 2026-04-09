@@ -18,11 +18,11 @@
               />
             </svg>
           </span>
-          <router-link to="/" class="text-xl font-bold text-zinc-950 dark:text-zinc-200"
-            >Kemini</router-link
-          >
+          <router-link to="/" class="flex items-center mr-2">
+            <img src="/logo.svg" class="h-10 w-10 dark:invert" alt="AI Studio" />
+          </router-link>
           <!--  -->
-          <app-navbar />
+          <app-navbar class="ml-2" />
         </div>
 
         <div class="flex flex-2 items-center justify-center">

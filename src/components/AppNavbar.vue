@@ -1,5 +1,5 @@
 <template>
-  <nav class="flex items-center gap-1 ml-6 text-sm">
+  <nav class="flex items-center gap-1 text-sm">
     <router-link
       to="/chat"
       class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm m-1"
