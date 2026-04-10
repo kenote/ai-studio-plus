@@ -13,6 +13,7 @@ export declare interface Chat {
 /** 消息 */
 export declare interface Message {
   id?: number
+  chatId?: number
   role: 'user' | 'assistant' | 'system'
   content: string | (TextContent | ImageContent)[]
   createdAt: Date

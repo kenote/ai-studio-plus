@@ -6,8 +6,9 @@
       <nav class="flex items-center h-12 w-stretch">
         <div class="flex flex-1 items-center">
           <span
-            @click="() => console.log('ok')"
-            class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm mr-4"
+            v-if="route.path !== '/'"
+            @click="toggleSidebar"
+            class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm mr-4 cursor-pointer"
           >
             <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -143,12 +144,18 @@ import ModelSettings from '@/components/settings/ModelSettings.vue'
 import { db } from '@/db'
 import { emitter, Events } from '@/utils/emitter'
 import { usePreferredDark } from '@vueuse/core'
+import { useRoute } from 'vue-router'
 
 const showSettings = ref(false)
 const activeMenu = ref('general')
 const providerCount = ref(0)
 const modelCount = ref(0)
 const isDark = usePreferredDark()
+const route = useRoute()
+
+const toggleSidebar = () => {
+  emitter.emit(Events.TOGGLE_SIDEBAR)
+}
 
 const loadCounts = async () => {
   providerCount.value = await db.providers.count()
