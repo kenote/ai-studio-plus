@@ -34,7 +34,7 @@
             <a
               :href="row.apiBase"
               target="_blank"
-              class="text-sm text-teal-600 hover:text-teal-700 truncate block max-w-[150px]"
+              class="text-sm text-teal-600 hover:text-teal-700 truncate block max-w-[380px]"
               >{{ row.apiBase }}</a
             >
             <el-button link size="small" @click="copyApiKey(row.apiBase)">

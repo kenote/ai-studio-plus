@@ -39,3 +39,6 @@ __screenshots__/
 
 # Vite
 *.timestamp-*-*.mjs
+
+# Rest files
+*.http

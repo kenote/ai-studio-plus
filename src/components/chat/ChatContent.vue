@@ -9,7 +9,7 @@
         <div class="w-[260px] pr-6">
           <ModelSelect
             v-model="selectedModelId"
-            model-type="chat"
+            :model-groups="modelGroups"
             @update:model-value="onModelChange"
           />
         </div>
@@ -38,10 +38,10 @@
               <template v-for="(item, i) in msg.content" :key="i">
                 <img
                   v-if="item.type === 'image_url'"
-                  :src="item.image_url.url"
+                  :src="(item as ImageContent).image_url.url"
                   class="max-w-[200px] rounded"
                 />
-                <span v-else>{{ item.text }}</span>
+                <span v-else-if="item.type === 'text'">{{ (item as TextContent).text }}</span>
               </template>
             </div>
             <div v-else>{{ msg.content }}</div>
@@ -64,19 +64,22 @@
             resize="none"
             :autosize="{ minRows: 3, maxRows: 3 }"
             placeholder="输入消息内容..."
-            @keydown.enter.prevent="handleEnd"
+            @keydown.enter.prevent="handleSend"
           />
           <div class="h-8 p-[8px_2px] flex items-center justify-between">
-            <div class="ml-3">
-              <el-button
-                type="info"
-                circle
-                class="!rounded-1 !border-0 !bg-transparent hover:!bg-zinc-200 dark:hover:!bg-zinc-700 !c-black !dark:c-white"
-              >
-                <template #icon>
-                  <el-icon class="!text-4"><Plus /></el-icon>
-                </template>
-              </el-button>
+            <div class="ml-3 flex gap-2">
+              <el-tooltip content="上传图片" placement="top">
+                <el-button
+                  type="info"
+                  circle
+                  class="!rounded-1 !border-0 !bg-transparent hover:!bg-zinc-200 dark:hover:!bg-zinc-700 !c-black !dark:c-white"
+                  @click="uploadImage"
+                >
+                  <template #icon>
+                    <el-icon class="!text-4"><Plus /></el-icon>
+                  </template>
+                </el-button>
+              </el-tooltip>
             </div>
             <div class="mr-3">
               <el-button
@@ -88,6 +91,20 @@
               />
             </div>
           </div>
+          <div
+            v-if="imageList.length > 0"
+            class="px-2 pb-2 flex gap-2 flex-wrap absolute -top-20 left-0 right-0"
+          >
+            <div v-for="(img, idx) in imageList" :key="idx" class="relative group">
+              <img :src="img.url" class="w-16 h-16 object-cover rounded" />
+              <button
+                class="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 flex items-center justify-center"
+                @click="removeImage(idx)"
+              >
+                ×
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -96,10 +113,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import type { Chat, Message } from '@/types/chat'
+import type { Chat, Message, ContentItem, TextContent, ImageContent } from '@/types/chat'
 import { db } from '@/db'
 import ModelSelect from './ModelSelect.vue'
 import { Top, Plus } from '@element-plus/icons-vue'
+import { getModelGroups } from '@/db/model'
+import type { ModelGroup } from '@/types/provider'
+import { emitter, Events } from '@/utils/emitter'
 
 const props = defineProps<{
   chat: Chat | undefined
@@ -112,29 +132,83 @@ const emit = defineEmits<{
 const messages = ref<Message[]>([])
 const inputMessage = ref('')
 const selectedModelId = ref<number>()
+const imageList = ref<{ url: string; name: string }[]>([])
+const modelGroups = ref<ModelGroup[]>([])
 
-const onModelChange = async (modelId: number) => {
-  if (!props.chat) return
-  const chat = await db.chats.get(props.chat.id)
-  if (!chat) return
-  const model = await db.models.get(modelId)
-  if (!model || !model.providerId) return
-  await db.chats.update(props.chat.id, { modelId, providerId: model.providerId })
-  const updatedChat = { ...chat, modelId, providerId: model.providerId }
-  emit('update:chat', updatedChat)
+const uploadImage = () => {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/*'
+  input.onchange = (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (file) {
+      const url = URL.createObjectURL(file)
+      imageList.value.push({ url, name: file.name })
+    }
+  }
+  input.click()
 }
 
-const loadModels = async () => {
-  const models = (await db.models.toArray()).filter((m) => m.type?.includes('chat'))
-  console.log(selectedModelId)
-  if (!selectedModelId.value) {
-    selectedModelId.value = models[0]?.id
+const removeImage = (index: number) => {
+  const img = imageList.value[index]
+  if (img) {
+    URL.revokeObjectURL(img.url)
+    imageList.value.splice(index, 1)
   }
+}
+
+const handleSend = async () => {
+  if (!inputMessage.value.trim() && imageList.value.length === 0) return
+  if (!props.chat) return
+
+  const contents: ContentItem[] = []
+
+  if (imageList.value.length > 0) {
+    for (const img of imageList.value) {
+      contents.push({ type: 'image_url', image_url: { url: img.url } })
+    }
+  }
+
+  if (inputMessage.value.trim()) {
+    if (contents.length > 0) {
+      for (const content of contents) {
+        if (content.type === 'text') {
+          contents.push({ type: 'text', text: inputMessage.value })
+          break
+        }
+      }
+      if (!contents.some((c) => c.type === 'text')) {
+        contents.push({ type: 'text', text: inputMessage.value })
+      }
+    } else {
+      contents.push({ type: 'text', text: inputMessage.value })
+    }
+  }
+
+  const message: Message = {
+    role: 'user',
+    content:
+      contents.length === 0
+        ? ('' as string)
+        : contents.length === 1
+          ? (contents[0] as ContentItem)
+          : (contents as ContentItem[]),
+    createdAt: new Date(),
+    provider: '',
+  }
+
+  await db.messages.add({ chatId: props.chat.id, ...message })
+  messages.value.push({ ...message, chatId: props.chat.id } as Message)
+
+  inputMessage.value = ''
+  imageList.value = []
+  scrollToBottom()
 }
 
 const loadMessages = async () => {
   if (!props.chat?.id) {
     messages.value = []
+    selectedModelId.value = modelGroups.value[0]?.models[0]?.id
     return
   }
   const msgs = await db.messages.where('chatId').equals(props.chat.id).sortBy('createdAt')
@@ -152,21 +226,19 @@ const scrollToBottom = () => {
   }, 100)
 }
 
-const handleEnd = (e: KeyboardEvent) => {
-  if (e.ctrlKey || e.shiftKey) {
-    inputMessage.value += '\n'
-    return
-  }
-  // console.log('发送消息:', inputMessage.value)
-  const message: Partial<Message> = {
-    role: 'user',
-    content: inputMessage.value,
-  }
-  console.log('新消息对象:', message)
-}
-
 const formatTime = (date: Date) => {
   return new Date(date).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+}
+
+const onModelChange = async (modelId: number) => {
+  if (!props.chat) return
+  const chat = await db.chats.get(props.chat.id)
+  if (!chat) return
+  const model = await db.models.get(modelId)
+  if (!model || !model.providerId) return
+  await db.chats.update(props.chat.id, { modelId, providerId: model.providerId })
+  const updatedChat = { ...chat, modelId, providerId: model.providerId }
+  emit('update:chat', updatedChat)
 }
 
 watch(
@@ -176,9 +248,13 @@ watch(
   },
 )
 
-onMounted(() => {
-  loadModels()
+onMounted(async () => {
+  modelGroups.value = await getModelGroups('chat')
   loadMessages()
+  emitter.on(Events.DATA_CHANGE, async () => {
+    modelGroups.value = await getModelGroups('chat')
+    loadMessages()
+  })
 })
 </script>
 

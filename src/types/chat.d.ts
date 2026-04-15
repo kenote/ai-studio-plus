@@ -10,12 +10,15 @@ export declare interface Chat {
   activeAt: Date
 }
 
+/** 消息内容项 */
+type ContentItem = TextContent | ImageContent | { type: string; [key: string]: unknown }
+
 /** 消息 */
 export declare interface Message {
   id?: number
   chatId?: number
   role: 'user' | 'assistant' | 'system'
-  content: string | (TextContent | ImageContent)[]
+  content: string | ContentItem | ContentItem[]
   createdAt: Date
   model?: string
   provider: string

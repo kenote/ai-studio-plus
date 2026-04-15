@@ -21,6 +21,13 @@ export declare interface Model {
   name: string
   providerId?: number
   groupId?: number
-  type: ('chat' | 'image' | 'ocr' | 'video' | 'audio')[]
+  type: ModelType[]
   editing?: boolean
+}
+
+export declare type ModelType = 'chat' | 'image' | 'ocr' | 'video' | 'audio'
+
+export declare type ModelGroup = {
+  groupName: string
+  models: Model[]
 }

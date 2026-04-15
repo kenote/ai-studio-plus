@@ -169,9 +169,7 @@ const fetchRemoteModels = async () => {
       filterTable.value.find((v) => v.name == currentGroup?.name.toLowerCase())?.pattern ??
       `^(${fillterName})`
     const data =
-      (<RemoteModel[]>response.data.data).filter(
-        (v) => v.object === 'model' && new RegExp(pattern)?.test(v.id),
-      ) || []
+      (<RemoteModel[]>response.data.data).filter((v) => new RegExp(pattern, 'i')?.test(v.id)) || []
     remoteModels.value = orderBy(
       data.map((m: { id: string }) => ({
         id: 0,
