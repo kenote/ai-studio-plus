@@ -1,27 +1,35 @@
+import { ModelInfo } from './provider'
+
+/** 请求消息 */
+export declare interface AIRequest extends ModelInfo {
+  messages: Pick<Message, 'role' | 'content'>[]
+  stream?: boolean
+}
+
 /** 聊天会话 */
 export declare interface Chat {
   id?: number
-  title: string
+  title?: string
   modelId: number
   providerId: number
   messages: Message[]
-  createdAt: Date
-  updatedAt: Date
-  activeAt: Date
+  createdAt: number
+  updatedAt: number
+  activeAt: number
 }
 
 /** 消息内容项 */
-type ContentItem = TextContent | ImageContent | { type: string; [key: string]: unknown }
+type ContentItem = TextContent | ImageContent
 
 /** 消息 */
 export declare interface Message {
   id?: number
   chatId?: number
   role: 'user' | 'assistant' | 'system'
-  content: string | ContentItem | ContentItem[]
-  createdAt: Date
-  model?: string
-  provider: string
+  content: string | ImageContent | ContentItem[]
+  createdAt?: number
+  modelId?: number
+  modelFullName?: string
 }
 
 /** 文字消息 */

@@ -12,7 +12,7 @@ const router = createRouter({
       meta: { layout: LayoutPanel },
     },
     {
-      path: '/chat',
+      path: '/chat/:id?',
       name: 'chat',
       component: () => import('@/views/ChatView.vue'),
       meta: { layout: LayoutPanel },

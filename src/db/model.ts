@@ -1,5 +1,22 @@
 import { db } from './'
-import type { Model, ModelType } from '@/types/provider'
+import type { Model, ModelType, ModelInfo } from '@/types/provider'
+
+/** 模型消息 */
+export async function getModelInfo(modelId: number): Promise<ModelInfo | undefined> {
+  const model = await db.models.get(modelId)
+  if (!model) {
+    console.error('Model not found for id:', modelId)
+    return undefined
+  }
+  const { apiBase } = (await db.providers.get(model?.providerId))!
+  const { apiKey } = (await db.groups.get(model?.groupId))!
+  console.log('Model Info - Name:', model.name, 'API Base:', apiBase, 'API Key:', apiKey)
+  return {
+    modelName: model.name,
+    apiBase: toOpenaiURL(apiBase),
+    apiKey,
+  }
+}
 
 /** 获取模型全名（模型名 | 组名） */
 export async function getModelFullName(modelId: number): Promise<string> {
@@ -44,4 +61,14 @@ export async function getModelGroups(typeFilter: ModelType, search?: string) {
     }
   }
   return Array.from(groupMap.values()).sort((a, b) => a.groupName.localeCompare(b.groupName)) // 按组名排序
+}
+
+/** 转 OpenAI URL */
+export function toOpenaiURL(apiBase: string) {
+  if (apiBase.includes('googleapis')) {
+    return apiBase.replace(/\/?$/, '/v1beta/openai')
+  } else if (apiBase.includes('anthropic')) {
+    return apiBase.replace(/\/?$/, '/v1/openai')
+  }
+  return apiBase.replace(/\/?$/, '/v1')
 }

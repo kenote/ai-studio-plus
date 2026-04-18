@@ -31,3 +31,9 @@ export declare type ModelGroup = {
   groupName: string
   models: Model[]
 }
+
+export declare type ModelInfo = {
+  apiBase: string
+  apiKey: string
+  modelName: string
+}

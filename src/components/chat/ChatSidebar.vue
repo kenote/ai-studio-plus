@@ -10,7 +10,7 @@
         class="flex items-center justify-between p-3 border-b border-zinc-200 dark:border-zinc-800"
       >
         <span class="text-base font-medium">历史会话</span>
-        <!-- <button
+        <button
           @click="createChat"
           class="p-1 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700"
           title="新建会话"
@@ -23,16 +23,16 @@
               d="M12 4v16m8-8H4"
             />
           </svg>
-        </button> -->
+        </button>
       </div>
       <el-scrollbar class="flex-1">
         <div class="p-2 space-y-1">
-          <div
+          <router-link
             v-for="chat in chats"
             :key="chat.id"
+            :to="`/chat/${chat.id}`"
             class="group flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-700"
-            :class="activeChatId === chat.id ? 'bg-zinc-200 dark:bg-zinc-700' : ''"
-            @click="selectChat(chat)"
+            :class="$route.params.id == chat.id ? 'bg-zinc-200 dark:bg-zinc-700' : ''"
           >
             <div class="flex-1 min-w-0">
               <div class="text-sm font-medium truncate">{{ chat.title || '新会话' }}</div>
@@ -41,8 +41,7 @@
               </div>
             </div>
             <button
-              v-if="activeChatId !== chat.id"
-              @click.stop="deleteChat(chat)"
+              @click.prevent.stop="deleteChat(chat)"
               class="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-zinc-300 dark:hover:bg-zinc-600"
               title="删除"
             >
@@ -55,7 +54,7 @@
                 />
               </svg>
             </button>
-          </div>
+          </router-link>
           <div v-if="chats.length === 0" class="text-center text-zinc-400 text-sm py-8">
             暂无会话
           </div>
@@ -67,18 +66,12 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { db } from '@/db'
 import type { Chat } from '@/types/chat'
 import { emitter, Events } from '@/utils/emitter'
 
-defineProps<{
-  activeChatId?: number
-}>()
-
-const emit = defineEmits<{
-  select: [chat: Chat]
-  create: []
-}>()
+const router = useRouter()
 
 const isCollapsed = ref(false)
 const chats = ref<Chat[]>([])
@@ -87,24 +80,31 @@ const loadChats = async () => {
   chats.value = await db.chats.orderBy('updatedAt').reverse().toArray()
 }
 
-// const createChat = () => {
-//   emit('create')
-// }
-
-const selectChat = (chat: Chat) => {
-  emit('select', chat)
+const createChat = async () => {
+  const now = Date.now()
+  const id = await db.chats.add({
+    title: '新会话',
+    modelId: 1,
+    providerId: 1,
+    messages: [],
+    createdAt: now,
+    updatedAt: now,
+    activeAt: now,
+  })
+  router.push(`/chat/${id}`)
 }
 
 const deleteChat = async (chat: Chat) => {
-  if (chat.id) {
-    await db.chats.delete(chat.id)
-    await db.messages.where('chatId').equals(chat.id).delete()
-    await loadChats()
-    emitter.emit(Events.DATA_CHANGE)
-  }
+  console.log(chat.id)
+  // if (chat.id) {
+  //   await db.chats.delete(chat.id)
+  //   // await db.messages.where('chatId').equals(chat.id).delete()
+  //   await loadChats()
+  //   emitter.emit(Events.DATA_CHANGE)
+  // }
 }
 
-const formatDate = (date: Date) => {
+const formatDate = (date: number) => {
   const d = new Date(date)
   const now = new Date()
   const diff = now.getTime() - d.getTime()
