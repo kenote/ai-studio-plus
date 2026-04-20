@@ -15,10 +15,13 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
+    "@types/marked": "^5.0.2",
     "axios": "^1.14.0",
     "dexie": "^4.4.2",
     "element-plus": "^2.13.6",
+    "highlight.js": "^11.11.1",
     "less": "^4.6.4",
+    "marked": "^18.0.2",
     "mitt": "^3.0.1",
     "pinia": "^3.0.4",
     "unocss": "66.6.0",
