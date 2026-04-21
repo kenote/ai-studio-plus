@@ -4,15 +4,9 @@
       <div
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
       >
-        <div></div>
-        <div>新会话</div>
-        <div class="w-[260px] pr-6">
-          <!-- <ModelSelect
-            v-model="selectedModelId"
-            :model-groups="modelGroups"
-            @update:model-value="onModelChange"
-          /> -->
-        </div>
+        <div class="w-[200px] pl-6"></div>
+        <div>{{ chatName }}</div>
+        <div class="w-[200px] pr-6"></div>
       </div>
       <div class="p-4 space-y-4 max-w-4xl mx-auto mt-20">
         <div v-if="messages.length === 0" class="text-center text-zinc-400 text-sm py-8">
@@ -113,11 +107,12 @@ import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
 import { useChatStream } from '@/composables/useChatStream'
-import { set } from 'lodash'
+import { set, last } from 'lodash'
 import { useRouter } from 'vue-router'
 import { loadImage, getInputContent, getRequestConfig, type ImageFile } from '@/utils/message'
 import { ElMessage } from 'element-plus'
 import MessageDelta from './MessageDelta.vue'
+import { getChatName } from '@/db/chat'
 
 const router = useRouter()
 
@@ -136,13 +131,19 @@ const selectedModelId = ref<number>()
 const imageList = ref<ImageFile[]>([])
 const stream = ref<boolean>(true)
 const isThinking = ref<number>(0)
+const chatName = ref('')
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
 
 /**
  * 发送请求
  */
-const handleSend = async () => {
+const handleSend = async (evt: KeyboardEvent) => {
+  if (evt.shiftKey || evt.ctrlKey) {
+    inputMessage.value += '\n'
+    return
+  }
+  if (!inputMessage.value.trim() && imageList.value.length === 0) return
   // 采集用户输入
   const contents: (string | TextContent | ImageContent)[] = getInputContent(
     inputMessage.value,
@@ -167,16 +168,29 @@ const handleSend = async () => {
     },
     'user',
   )
+  chatName.value = (await getChatName(props.chat!))!
+  await sendMessage()
+}
+
+/**
+ * 发送消息; 可以赋ID
+ * @param id
+ */
+const sendMessage = async (id?: number) => {
   try {
+    let assistantId = id
+    const msgs = id ? messages.value.slice(0, -1) : messages.value
     // 获取请求参数
-    const options = await getRequestConfig(selectedModelId.value!, messages.value, stream.value)
+    const options = await getRequestConfig(selectedModelId.value!, msgs, stream.value)
     // 生成回复的信息ID
-    const modelFullName = await getModelFullName(selectedModelId.value!)
-    const assistantId = await updateMessage(
-      { modelId: selectedModelId.value, modelFullName },
-      'assistant',
-    )
-    console.log('assistantId', assistantId)
+    if (!id) {
+      const modelFullName = await getModelFullName(selectedModelId.value!)
+      assistantId = await updateMessage(
+        { modelId: selectedModelId.value, modelFullName },
+        'assistant',
+      )
+      console.log('assistantId', assistantId)
+    }
     // 发送聊天请求
     isThinking.value = assistantId!
     const delta = await useChatStream(options, '/chat/completions', streamCallback(assistantId!))
@@ -221,6 +235,12 @@ const streamCallback = (assistantId: number) => {
       if (status === 'stop') {
         isThinking.value = 0
       }
+      scrollToBottom()
+    }
+
+    if (status === 'error') {
+      await updateMessage({ error: longContent }, 'assistant', assistantId)
+      isThinking.value = 0
       scrollToBottom()
     }
   }
@@ -271,6 +291,7 @@ const updateMessage = async (
  * 加载聊天信息
  */
 const loadMessages = async () => {
+  chatName.value = (await getChatName(props.chat!))!
   if (!props.chat?.id) {
     selectedModelId.value = modelGroups.value[0]?.models[0]?.id
     messages.value = []
@@ -280,6 +301,11 @@ const loadMessages = async () => {
   selectedModelId.value = props.chat.modelId
   messages.value = await db.messages.where('chatId').equals(props.chat?.id).sortBy('id')
   scrollToBottom()
+  clearValues()
+  if (!last(messages.value)?.content) {
+    // 检查上次未完成请求
+    await sendMessage(last(messages.value)?.id)
+  }
 }
 
 /**
@@ -310,8 +336,16 @@ const onModelChange = async (modelId: number) => {
 watch(
   () => props.chat?.id,
   (value: number | undefined, oldValue: number | undefined) => {
+    console.log()
     if (value === oldValue) return
     loadMessages()
+  },
+)
+watch(
+  () => props.chat?.title,
+  async (value: string | undefined, oldValue: string | undefined) => {
+    if (value === oldValue) return
+    chatName.value = (await getChatName(props.chat!))!
   },
 )
 

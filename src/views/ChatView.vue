@@ -14,6 +14,7 @@ import type { Chat } from '@/types/chat'
 import ChatSidebar from '@/components/chat/ChatSidebar.vue'
 import ChatContent from '@/components/chat/ChatContent.vue'
 import { useRoute } from 'vue-router'
+import { emitter, Events } from '@/utils/emitter'
 
 // const router = useRouter()
 const route = useRoute()
@@ -21,6 +22,7 @@ const activeChat = ref<Chat>()
 
 const onChatUpdate = (chat: Chat) => {
   activeChat.value = chat
+  emitter.emit(Events.CHAT_CHANGE)
 }
 
 const loadChat = async () => {

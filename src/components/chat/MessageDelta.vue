@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="type === 'assistant'"
-    class="min-w-[200px] max-w-[85%] min-w-[280px] rounded-xl px-5 mx-4 py-4 max-w-full"
+    class="min-w-[200px] max-w-[85%] min-w-[280px] rounded-xl px-5 mx-4 py-4 w-full"
   >
     <el-progress
       v-if="isThinking"

@@ -45,6 +45,11 @@ export async function useChatStream(
 
         try {
           const parsed = JSON.parse(message)
+          console.log(parsed)
+          if (parsed.error) {
+            callback?.(parsed.error, 'error')
+            break
+          }
           // 兼容 OpenAI 格式：choices[0].delta.content
           // const delta = parsed.choices?.[0]?.delta?.content || ''
           callback?.(parsed.choices?.[0]?.delta?.content || '', parsed.choices?.[0]?.finish_reason)

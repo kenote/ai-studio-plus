@@ -30,6 +30,7 @@ export declare interface Message {
   createdAt?: number
   modelId?: number
   modelFullName?: string
+  error?: string
 }
 
 /** 文字消息 */
