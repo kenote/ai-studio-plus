@@ -60,7 +60,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useWindowSize } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
 import { db } from '@/db'
 import type { Chat } from '@/types/chat'
@@ -72,7 +73,14 @@ import { Plus } from '@element-plus/icons-vue'
 const router = useRouter()
 const route = useRoute()
 
+const { width } = useWindowSize()
 const isCollapsed = ref(false)
+
+const checkCollapsed = () => {
+  if (width.value < 1186) {
+    isCollapsed.value = true
+  }
+}
 const chats = ref<Chat[]>([])
 
 const loadChats = async () => {
@@ -111,8 +119,17 @@ const handleToggle = () => {
 
 onMounted(() => {
   loadChats()
+  checkCollapsed()
   emitter.on(Events.TOGGLE_SIDEBAR, handleToggle)
   emitter.on(Events.CHAT_CHANGE, loadChats)
+})
+
+watch(width, (newWidth) => {
+  if (newWidth < 1186) {
+    isCollapsed.value = true
+  } else {
+    isCollapsed.value = false
+  }
 })
 
 onUnmounted(() => {

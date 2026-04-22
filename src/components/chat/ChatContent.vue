@@ -4,9 +4,9 @@
       <div
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
       >
-        <div class="w-[200px] pl-6"></div>
+        <div class="w-[2px] pl-6"></div>
         <div>{{ chatName }}</div>
-        <div class="w-[200px] pr-6"></div>
+        <div class="w-[20px] pr-6"></div>
       </div>
       <div class="p-4 space-y-4 max-w-4xl mx-auto mt-20">
         <div v-if="messages.length === 0" class="text-center text-zinc-400 text-sm py-8">
@@ -182,6 +182,7 @@ const sendMessage = async (id?: number) => {
     const msgs = id ? messages.value.slice(0, -1) : messages.value
     // 获取请求参数
     const options = await getRequestConfig(selectedModelId.value!, msgs, stream.value)
+    console.log(options)
     // 生成回复的信息ID
     if (!id) {
       const modelFullName = await getModelFullName(selectedModelId.value!)
