@@ -1,6 +1,7 @@
-import type { TextContent, ImageContent, AIRequest, Message } from '@/types/chat'
+import type { TextContent, ImageContent, AIRequest, Message, ContentItem } from '@/types/chat'
 import { getModelInfo } from '@/db/model'
-import { pick } from 'lodash'
+import { pick, last, set, isString, isArray } from 'lodash'
+import { useSearchContent } from '@/composables/useSearchContent'
 
 /**
  * 文件转 base64
@@ -129,4 +130,38 @@ export function formatDate(value: number) {
     minute: '2-digit',
     second: '2-digit',
   })
+}
+
+/**
+ * 联网搜索用户消息
+ * @param msgs
+ * @param openSearch
+ * @returns
+ */
+export async function getSearchContent(msgs: Message[], openSearch: boolean = false) {
+  if (!openSearch) return []
+  const lsatContent = last(msgs)?.content
+  let query = ''
+  if (isString(lsatContent)) {
+    query = lsatContent
+  } else if (isArray(lsatContent)) {
+    query = lsatContent.find((v) => v.type === 'text')?.text ?? ''
+  }
+  const rks = await useSearchContent(query)
+  console.log(rks?.results.map((v) => v.content))
+  if (rks?.results && rks.results.length > 0) {
+    let tmpContent: ContentItem[] = []
+    if (isString(last(msgs)?.content)) {
+      tmpContent.push({ type: 'text', text: last(msgs)?.content as string })
+    }
+    tmpContent = tmpContent.concat(
+      rks.results.map((v) => ({
+        type: 'text',
+        text: v.content,
+      })),
+    )
+    console.log(tmpContent)
+    set(last(msgs)!, 'content', tmpContent)
+  }
+  return rks?.results
 }

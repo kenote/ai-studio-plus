@@ -22,12 +22,67 @@
           </el-select>
         </el-form-item>
       </div>
-    </div>
+      <el-divider />
+      <div class="flex items-center gap-2 justify-between">
+        <span>联网搜索</span>
+        <el-form-item class="!mb-0 w-[40px]">
+          <el-switch
+            v-model="configForm.search!.open"
+            @change="handleSearchChange"
+            class="justify-end w-full"
+          />
+        </el-form-item>
+      </div>
+      <div class="flex items-center gap-2 justify-between">
+        <span>提供方</span>
+        <el-form-item class="!mb-0 w-[120px]">
+          <el-select
+            v-model="configForm.search!.type"
+            placeholder="请选择提供方"
+            @change="handleSearchChange"
+            class="justify-end w-full"
+          >
+            <el-option label="SearXNG" value="searxng" />
+            <el-option label="Tavily" value="tavily" />
+          </el-select>
+        </el-form-item>
+      </div>
+      <template v-if="configForm.search?.type === 'searxng'">
+        <el-form-item label="主机" label-width="150px">
+          <el-input
+            v-model="configForm.search!.searxng"
+            placeholder="https://search.kenote.site"
+            @blur="handleSearchChange"
+            class="justify-end w-full"
+          />
+        </el-form-item>
+      </template>
+      <template v-if="configForm.search?.type === 'tavily'">
+        <el-form-item label="主机" label-width="150px">
+          <el-input
+            v-model="configForm.search!.tavily.host"
+            placeholder="https://api.tavily.com"
+            @blur="handleSearchChange"
+            class="justify-end w-full"
+          />
+        </el-form-item>
+        <el-form-item label="API 密钥" label-width="150px">
+          <el-input
+            v-model="configForm.search!.tavily.token"
+            placeholder="请输入 API 密钥"
+            show-password
+            @blur="handleSearchChange"
+            class="justify-end w-full"
+          />
+        </el-form-item>
+      </template>
+      <!-- </div>
 
     <div class="text-sm font-medium pl-4">归档</div>
-    <div class="space-y-4 bg-coolgray-50 dark:bg-zinc-800 p-4 rounded">
+    <div class="space-y-4 bg-coolgray-50 dark:bg-zinc-800 p-4 rounded"> -->
+      <el-divider />
       <div class="flex items-center gap-2 justify-between">
-        <span>开启</span>
+        <span>归档</span>
         <el-form-item class="!mb-0 w-[40px]">
           <el-switch
             v-model="configForm.archive"
@@ -36,12 +91,11 @@
           />
         </el-form-item>
       </div>
-      <el-divider />
       <div class="text-sm font-medium">Joplin Web Clipper</div>
       <el-form-item label="主机" label-width="150px">
         <el-input
           v-model="configForm.joplin.host"
-          placeholder="默认 http://localhost:41184"
+          placeholder="http://localhost:41184"
           @blur="handleJoplinChange"
           class="justify-end w-full"
         />
@@ -123,6 +177,15 @@ const configForm = reactive<Config>({
     token: '',
     folder: '',
   },
+  search: {
+    open: false,
+    type: 'searxng',
+    searxng: '',
+    tavily: {
+      host: '',
+      token: '',
+    },
+  },
 })
 
 const initConfig = async () => {
@@ -131,9 +194,18 @@ const initConfig = async () => {
     configForm.theme = config.theme || 'light'
     configForm.archive = config.archive || false
     configForm.joplin = {
-      host: config.joplin?.host || '',
+      host: config.joplin?.host || import.meta.env.VITE_JOPLIN_HOST,
       token: config.joplin?.token || '',
-      folder: config.joplin?.folder || '',
+      folder: config.joplin?.folder || import.meta.env.VITE_JOPLIN_FOLDER,
+    }
+    configForm.search = {
+      open: config.search?.open || false,
+      type: config.search?.type || 'searxng',
+      searxng: config.search?.searxng || import.meta.env.VITE_SEARXNG_HOST,
+      tavily: {
+        host: config.search?.tavily.host || import.meta.env.VITE_TAVILY_HOST,
+        token: config.search?.tavily.token || import.meta.env.VITE_TAVILY_TOKEN,
+      },
     }
   } else {
     await db.config.put({
@@ -141,6 +213,12 @@ const initConfig = async () => {
       theme: 'light',
       archive: false,
       joplin: { host: '', token: '', folder: '' },
+      search: {
+        open: false,
+        type: 'searxng',
+        searxng: '',
+        tavily: { host: '', token: '' },
+      },
     })
   }
   applyTheme(configForm.theme)
@@ -160,12 +238,22 @@ const saveConfig = async () => {
     theme: configForm.theme,
     archive: configForm.archive,
     joplin: {
-      host: configForm.joplin.host,
+      host: configForm.joplin.host?.replace(/(\/)$/, ''),
       token: configForm.joplin.token,
       folder: configForm.joplin.folder,
     },
+    search: {
+      open: configForm.search?.open || false,
+      type: configForm.search?.type,
+      searxng: configForm.search?.searxng?.replace(/(\/)$/, ''),
+      tavily: {
+        host: configForm.search?.tavily.host?.replace(/(\/)$/, ''),
+        token: configForm.search?.tavily.token,
+      },
+    },
   }
   await db.config.put(data)
+  emitter.emit(Events.DATA_CHANGE)
 }
 
 const handleThemeChange = () => {
@@ -181,10 +269,20 @@ const handleJoplinChange = () => {
   saveConfig()
 }
 
+const handleSearchChange = () => {
+  saveConfig()
+}
+
 const resetConfig = () => {
   configForm.theme = 'light'
   configForm.archive = false
   configForm.joplin = { host: '', token: '', folder: '' }
+  configForm.search = {
+    open: false,
+    type: 'searxng',
+    searxng: '',
+    tavily: { host: '', token: '' },
+  }
   initConfig()
 }
 

@@ -3,6 +3,16 @@ export declare interface Config {
   id?: number
   /** 主题 */
   theme: 'light' | 'dark' | 'auto'
+  /** 联网搜索 */
+  search?: {
+    open: boolean
+    type?: 'searxng' | 'tavily'
+    searxng?: string
+    tavily: {
+      host?: string
+      token?: string
+    }
+  }
   /** 开启归档 */
   archive: boolean
   /** Joplin 配置 */

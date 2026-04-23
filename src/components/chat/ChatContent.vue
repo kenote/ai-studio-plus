@@ -24,6 +24,7 @@
             :createdAt="msg.createdAt!"
             :model-name="msg.modelFullName!"
             :is-thinking="isThinking === msg.id"
+            :open-search="openSearch"
           />
         </div>
       </div>
@@ -109,7 +110,13 @@ import { emitter, Events } from '@/utils/emitter'
 import { useChatStream } from '@/composables/useChatStream'
 import { set, last } from 'lodash'
 import { useRouter } from 'vue-router'
-import { loadImage, getInputContent, getRequestConfig, type ImageFile } from '@/utils/message'
+import {
+  loadImage,
+  getInputContent,
+  getRequestConfig,
+  getSearchContent,
+  type ImageFile,
+} from '@/utils/message'
 import { ElMessage } from 'element-plus'
 import MessageDelta from './MessageDelta.vue'
 import { getChatName } from '@/db/chat'
@@ -132,6 +139,7 @@ const imageList = ref<ImageFile[]>([])
 const stream = ref<boolean>(true)
 const isThinking = ref<number>(0)
 const chatName = ref('')
+const openSearch = ref<boolean>(true)
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
 
@@ -180,6 +188,8 @@ const sendMessage = async (id?: number) => {
   try {
     let assistantId = id
     const msgs = id ? messages.value.slice(0, -1) : messages.value
+    // 联网搜索
+    await getSearchContent(msgs, openSearch.value)
     // 获取请求参数
     const options = await getRequestConfig(selectedModelId.value!, msgs, stream.value)
     console.log(options)
@@ -292,6 +302,8 @@ const updateMessage = async (
  * 加载聊天信息
  */
 const loadMessages = async () => {
+  const config = await db.config.get(1)
+  openSearch.value = config?.search?.open || false
   chatName.value = (await getChatName(props.chat!))!
   if (!props.chat?.id) {
     selectedModelId.value = modelGroups.value[0]?.models[0]?.id
@@ -337,7 +349,6 @@ const onModelChange = async (modelId: number) => {
 watch(
   () => props.chat?.id,
   (value: number | undefined, oldValue: number | undefined) => {
-    console.log()
     if (value === oldValue) return
     loadMessages()
   },
@@ -358,6 +369,7 @@ onMounted(async () => {
     loadMessages()
   })
   scrollToBottom()
+  console.log(import.meta.env)
 })
 </script>
 

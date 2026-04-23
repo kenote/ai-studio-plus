@@ -11,7 +11,7 @@
       color="#969696"
     />
     <div class="text-xs text-zinc-400 mb-4">{{ modelName }} · {{ formatDate(createdAt) }}</div>
-
+    <div v-if="isThinking && openSearch" class="mb-2 text-sm text-coolgray">正在联网搜索...</div>
     <div class="markdown-body" v-html="renderMarkdown(content)"></div>
   </div>
   <div v-else-if="type === 'user'" class="flex-row-reverse rounded-lg px-4 py-2 text-sm">
@@ -52,6 +52,7 @@ const props = withDefaults(
     createdAt: number
     modelName?: string
     isThinking?: boolean
+    openSearch?: boolean
   }>(),
   {
     modelName: '',
@@ -84,6 +85,7 @@ const readContent = (value: string | ImageContent | ContentItem[]) => {
         imageList.value.push(item.image_url.url)
       } else if (item.type === 'text') {
         contentText.value += item.text
+        break
       }
     }
   } else if (value.type === 'image_url') {
