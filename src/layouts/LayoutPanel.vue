@@ -6,7 +6,7 @@
       <nav class="flex items-center h-12 w-stretch">
         <div class="flex flex-1 items-center">
           <span
-            v-if="route.path !== '/'"
+            v-if="route?.path !== '/'"
             @click="toggleSidebar"
             class="p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm mr-4 cursor-pointer"
           >

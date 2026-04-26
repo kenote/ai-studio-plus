@@ -1,9 +1,11 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createMemoryHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import LayoutPanel from '@/layouts/LayoutPanel.vue'
 
+const isServer = typeof window === 'undefined'
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: isServer ? createMemoryHistory() : createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',

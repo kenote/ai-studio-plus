@@ -1,6 +1,6 @@
 import { db } from './'
 import type { Chat } from '@/types/chat'
-import { isArray, isString, map } from 'lodash'
+import { isArray, isString, map } from 'lodash-es'
 
 export async function getChatName(chat: Chat, defaultName: string = '新会话') {
   if (chat) {

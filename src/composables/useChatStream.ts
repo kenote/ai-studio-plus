@@ -53,9 +53,9 @@ export async function useChatStream(
           // 兼容 OpenAI 格式：choices[0].delta.content
           // const delta = parsed.choices?.[0]?.delta?.content || ''
           callback?.(parsed.choices?.[0]?.delta?.content || '', parsed.choices?.[0]?.finish_reason)
-        } catch (e) {
+        } catch {
           // 如果解析失败，可能是数据帧被中间层截断，保持在 buffer 中等待下一次合并
-          console.warn('解析流出错，等待下一帧:', e)
+          console.warn('解析流出错，等待下一帧')
         }
       }
     }

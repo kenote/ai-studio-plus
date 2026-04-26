@@ -1,0 +1,11 @@
+services:
+  web:
+    build:
+      context: .
+    image: ai-studio-plus:latest
+    container_name: ai-studio-plus
+    restart: unless-stopped
+    ports:
+      - '${SERVER_PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=production

@@ -12,6 +12,11 @@ import router from './router'
 
 const app = createApp(App)
 
+app.config.warnHandler = (msg, instance) => {
+  if (msg.includes('Hydration') || msg.includes('hydrate') || msg.includes('mismatch')) return
+  console.warn(msg, instance)
+}
+
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)

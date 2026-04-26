@@ -108,7 +108,7 @@ import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
 import { useChatStream } from '@/composables/useChatStream'
-import { set, last } from 'lodash'
+import { set, last } from 'lodash-es'
 import { useRouter } from 'vue-router'
 import {
   loadImage,

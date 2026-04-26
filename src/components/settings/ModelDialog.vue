@@ -70,7 +70,7 @@ import { ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Model, Provider, Group } from '@/types/provider'
-import { orderBy } from 'lodash'
+import { orderBy } from 'lodash-es'
 import type { FilterTable } from '@/types/config'
 import { emitter, Events } from '@/utils/emitter'
 

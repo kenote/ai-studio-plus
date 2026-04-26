@@ -76,10 +76,6 @@
           />
         </el-form-item>
       </template>
-      <!-- </div>
-
-    <div class="text-sm font-medium pl-4">归档</div>
-    <div class="space-y-4 bg-coolgray-50 dark:bg-zinc-800 p-4 rounded"> -->
       <el-divider />
       <div class="flex items-center gap-2 justify-between">
         <span>归档</span>
@@ -191,33 +187,33 @@ const configForm = reactive<Config>({
 const initConfig = async () => {
   const config = await db.config.get(1)
   if (config) {
-    configForm.theme = config.theme || 'light'
+    configForm.theme = config.theme || 'auto'
     configForm.archive = config.archive || false
     configForm.joplin = {
-      host: config.joplin?.host || import.meta.env.VITE_JOPLIN_HOST,
+      host: config.joplin?.host || '',
       token: config.joplin?.token || '',
-      folder: config.joplin?.folder || import.meta.env.VITE_JOPLIN_FOLDER,
+      folder: config.joplin?.folder || '',
     }
     configForm.search = {
       open: config.search?.open || false,
       type: config.search?.type || 'searxng',
-      searxng: config.search?.searxng || import.meta.env.VITE_SEARXNG_HOST,
+      searxng: config.search?.searxng || '',
       tavily: {
-        host: config.search?.tavily.host || import.meta.env.VITE_TAVILY_HOST,
-        token: config.search?.tavily.token || import.meta.env.VITE_TAVILY_TOKEN,
+        host: config.search?.tavily.host || '',
+        token: config.search?.tavily.token || '',
       },
     }
   } else {
     await db.config.put({
       id: 1,
-      theme: 'light',
+      theme: 'auto',
       archive: false,
-      joplin: { host: '', token: '', folder: '' },
+      joplin: { host: 'http://localhost:41184', token: '', folder: 'AI Studio' },
       search: {
         open: false,
         type: 'searxng',
         searxng: '',
-        tavily: { host: '', token: '' },
+        tavily: { host: 'https://api.tavily.com', token: '' },
       },
     })
   }
@@ -245,9 +241,9 @@ const saveConfig = async () => {
     search: {
       open: configForm.search?.open || false,
       type: configForm.search?.type,
-      searxng: configForm.search?.searxng?.replace(/(\/)$/, ''),
+      searxng: configForm.search?.searxng?.replace(/\/+$/, ''),
       tavily: {
-        host: configForm.search?.tavily.host?.replace(/(\/)$/, ''),
+        host: configForm.search?.tavily.host?.replace(/\/+$/, ''),
         token: configForm.search?.tavily.token,
       },
     },

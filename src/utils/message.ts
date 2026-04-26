@@ -1,6 +1,6 @@
 import type { TextContent, ImageContent, AIRequest, Message, ContentItem } from '@/types/chat'
 import { getModelInfo } from '@/db/model'
-import { pick, last, set, isString, isArray } from 'lodash'
+import { pick, last, set, isString, isArray } from 'lodash-es'
 import { useSearchContent } from '@/composables/useSearchContent'
 
 /**

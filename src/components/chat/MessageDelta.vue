@@ -43,7 +43,7 @@ import type { ContentItem, ImageContent } from '@/types/chat'
 import { formatDate } from '@/utils/message'
 import { marked, type Tokens } from 'marked'
 import hljs from 'highlight.js'
-import { isString, isArray, isEqual } from 'lodash'
+import { isString, isArray, isEqual } from 'lodash-es'
 
 const props = withDefaults(
   defineProps<{
