@@ -1,7 +1,5 @@
 services:
   web:
-    build:
-      context: .
     image: ai-studio-plus:latest
     container_name: ai-studio-plus
     restart: unless-stopped

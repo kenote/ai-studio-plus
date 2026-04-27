@@ -36,7 +36,7 @@ preview:
 	@npm run preview
 
 start:
-	@[ -f ecosystem.config.cjs ] && pm2 start ecosystem.config.cjs && pm2 save
+	@pm2 start prod.server.mjs --name ai-studio-plus && pm2 save
 
 stop:
 	@pm2 stop ai-studio-plus

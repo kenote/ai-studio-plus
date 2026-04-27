@@ -14,10 +14,8 @@
     <div v-if="isThinking && openSearch" class="mb-2 text-sm text-coolgray">正在联网搜索...</div>
     <div class="markdown-body" v-html="renderMarkdown(content)"></div>
   </div>
-  <div v-else-if="type === 'user'" class="flex-row-reverse rounded-lg px-4 py-2 text-sm">
-    <div
-      class="min-w-[200px] max-w-[85%] min-w-[280px] rounded-xl px-5 py-4 max-w-full bg-coolgray-50 dark:bg-zinc-800"
-    >
+  <div v-else-if="type === 'user'" class="flex flex-row-reverse rounded-lg px-4 py-2 text-sm">
+    <div class="max-w-[85%] min-w-[280px] rounded-xl px-5 py-4 bg-coolgray-50 dark:bg-zinc-800">
       <div class="text-xs text-zinc-400 mb-1">
         {{ formatDate(createdAt) }}
       </div>
@@ -32,7 +30,7 @@
           />
         </template>
       </div>
-      <div class="markdown-body" v-html="renderMarkdown(contentText)"></div>
+      <div>{{ contentText }}</div>
     </div>
   </div>
 </template>

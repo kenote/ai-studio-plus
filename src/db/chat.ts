@@ -13,10 +13,9 @@ export async function getChatName(chat: Chat, defaultName: string = '新会话')
         message.content.filter((v) => v.type === 'text'),
         'text',
       ).join('')
-      console.log(content)
-      return content
+      return content.slice(0, 50)
     } else if (isString(message?.content)) {
-      return message?.content
+      return message?.content.slice(0, 50)
     }
     return defaultName
   }

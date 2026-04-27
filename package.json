@@ -23,6 +23,7 @@
     "axios": "^1.14.0",
     "connect": "^3.7.0",
     "dexie": "^4.4.2",
+    "dotenv": "^17.4.2",
     "element-plus": "^2.13.6",
     "express": "^5.2.1",
     "highlight.js": "^11.11.1",

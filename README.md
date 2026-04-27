@@ -75,8 +75,11 @@ cd ai-studio-plus && npm install
 # 编译代码
 npm run build:spa
 
+# 编辑环境变量
+cp .env.example .env
+
 # 启动 PM2
-make start
+pm2 start prod.server.mjs --name ai-studio-plus
 ```
 
 ::: 更新 :::
@@ -89,7 +92,7 @@ git pull
 npm run build:spa
 
 # 重启 PM2
-make restart
+pm2 restart ai-studio-plus
 ```
 
 ### Docker 部署
@@ -111,7 +114,7 @@ cp .env.example .env
 cp compose.example.yml compose.yml
 
 # 启动 Compose 容器
-docker-compose up -d
+docker-compose up -d && sleep 3 && docker logs ai-studio-plus --tail 5
 ```
 
 ::: 更新 :::
@@ -127,7 +130,7 @@ docker-compose down
 docker build -f Dockerfile --tag ai-studio-plus .
 
 # 启动 Compose 容器
-docker-compose up --build -d && sleep 3 && docker logs ai-studio-plus --tail 5
+docker-compose up -d && sleep 3 && docker logs ai-studio-plus --tail 5
 ```
 
 ## License

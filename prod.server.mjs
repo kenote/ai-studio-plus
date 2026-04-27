@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import http from 'http'
 import fs from 'fs'
 import path from 'path'
@@ -6,10 +7,8 @@ import { parse } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const PORT = process.env.PORT || 3000
-const DIST = process.env.NODE_ENV === 'production'
-  ? path.join(__dirname, '..', 'client')
-  : path.join(__dirname, 'dist', 'client')
+const PORT = process.env.SERVER_PORT || 3000
+const DIST = path.join(__dirname, 'dist', 'client')
 
 const MIME = {
   '.html': 'text/html',

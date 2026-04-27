@@ -5,7 +5,7 @@
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
       >
         <div class="w-[2px] pl-6"></div>
-        <div>{{ chatName }}</div>
+        <div class="truncate max-w-2xl">{{ chatName }}</div>
         <div class="w-[20px] pr-6"></div>
       </div>
       <div class="p-4 space-y-4 max-w-4xl mx-auto mt-20">
