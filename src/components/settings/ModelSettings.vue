@@ -25,7 +25,7 @@
             v-for="g in groups.filter((g) => g.providerId === p.id)"
             :key="g.id"
             :label="`${p.name} - ${g.name}`"
-            :value="g.id"
+            :value="g.id!"
           />
         </el-option-group>
       </el-select>
@@ -70,7 +70,7 @@
                 v-for="g in groups.filter((g) => g.providerId === p.id)"
                 :key="g.id"
                 :label="`${p.name} - ${g.name}`"
-                :value="g.id"
+                :value="g.id!"
               />
             </el-option-group>
           </el-select>
@@ -124,7 +124,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
-import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Provider, Group, Model } from '@/types/provider'

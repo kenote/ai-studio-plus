@@ -156,7 +156,6 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
 import { db } from '@/db'
 import type { Config } from '@/types/config'
 import { emitter, Events } from '@/utils/emitter'

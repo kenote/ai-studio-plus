@@ -5,6 +5,9 @@ import vue from '@vitejs/plugin-vue'
 import UnoCSS from 'unocss/vite'
 import { presetWind3 } from 'unocss'
 import ssr from 'vite-plugin-ssr/plugin'
+import Components from 'unplugin-vue-components/vite'
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import AutoImport from 'unplugin-auto-import/vite'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
@@ -43,6 +46,27 @@ export default defineConfig({
       prerender: false,
     }),
     elementPlusCSS(),
+    Components({
+      resolvers: [
+        ElementPlusResolver({
+          importStyle: false,
+        }),
+      ],
+      dts: 'src/components.d.ts',
+    }),
+    AutoImport({
+      resolvers: [
+        ElementPlusResolver({
+          importStyle: false,
+        }),
+      ],
+      imports: [
+        'vue',
+        'vue-router',
+        'pinia',
+      ],
+      dts: 'src/auto-imports.d.ts',
+    }),
   ],
   resolve: {
     alias: {
@@ -58,5 +82,19 @@ export default defineConfig({
   },
   build: {
     chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('element-plus')) return 'element-plus'
+            if (id.includes('vue')) return 'vue'
+            if (id.includes('@vueuse')) return 'vueuse'
+            if (id.includes('highlight.js')) return 'highlight'
+            if (id.includes('marked')) return 'marked'
+            return 'vendor'
+          }
+        },
+      },
+    },
   },
 })

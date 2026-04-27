@@ -2,7 +2,6 @@ import { createSSRApp, defineComponent, h } from 'vue'
 import { ZINDEX_INJECTION_KEY, ID_INJECTION_KEY } from 'element-plus'
 import PageShell from './PageShell.vue'
 import router from '../src/router'
-import ElementPlus from 'element-plus'
 import '../src/assets/less/main.less'
 import type { Component, PageContext, PageProps } from './types'
 
@@ -24,6 +23,5 @@ function createApp(Page: Component, pageProps: PageProps | undefined, pageContex
     if (msg.includes('Hydration') || msg.includes('hydrate') || msg.includes('mismatch')) return
   }
   app.use(router)
-  app.use(ElementPlus)
   return app
 }

@@ -152,7 +152,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessageBox, ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Provider, Group } from '@/types/provider'

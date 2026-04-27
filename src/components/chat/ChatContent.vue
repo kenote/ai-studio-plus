@@ -117,7 +117,6 @@ import {
   getSearchContent,
   type ImageFile,
 } from '@/utils/message'
-import { ElMessage } from 'element-plus'
 import MessageDelta from './MessageDelta.vue'
 import { getChatName } from '@/db/chat'
 
@@ -146,10 +145,12 @@ const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
 /**
  * 发送请求
  */
-const handleSend = async (evt: KeyboardEvent) => {
-  if (evt.shiftKey || evt.ctrlKey) {
-    inputMessage.value += '\n'
-    return
+const handleSend = async (evt?: Event | KeyboardEvent) => {
+  if (evt && 'key' in evt) {
+    if (evt.shiftKey || evt.ctrlKey) {
+      inputMessage.value += '\n'
+      return
+    }
   }
   if (!inputMessage.value.trim() && imageList.value.length === 0) return
   // 采集用户输入

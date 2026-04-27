@@ -66,7 +66,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
 import { useClipboard } from '@vueuse/core'
 import { db } from '@/db'
 import type { Model, Provider, Group } from '@/types/provider'

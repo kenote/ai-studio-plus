@@ -10,7 +10,7 @@
         v-for="model in group.models"
         :key="String(model.id)"
         :label="model.name"
-        :value="model.id"
+        :value="model.id!"
       />
     </el-option-group>
   </el-select>

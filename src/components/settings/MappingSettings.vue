@@ -82,7 +82,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { ElMessageBox, ElMessage } from 'element-plus'
 import { db } from '@/db'
 import type { Mapping } from '@/types/config'
 
