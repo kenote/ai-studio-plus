@@ -148,7 +148,6 @@ export async function getSearchContent(msgs: Message[], openSearch: boolean = fa
     query = lsatContent.find((v) => v.type === 'text')?.text ?? ''
   }
   const rks = await useSearchContent(query)
-  console.log(rks?.results.map((v) => v.content))
   if (rks?.results && rks.results.length > 0) {
     let tmpContent: ContentItem[] = []
     if (isString(last(msgs)?.content)) {
@@ -160,7 +159,6 @@ export async function getSearchContent(msgs: Message[], openSearch: boolean = fa
         text: v.content,
       })),
     )
-    console.log(tmpContent)
     set(last(msgs)!, 'content', tmpContent)
   }
   return rks?.results

@@ -32,7 +32,7 @@ function elementPlusCSS() {
         }
         next()
       })
-    }
+    },
   }
 }
 
@@ -60,11 +60,7 @@ export default defineConfig({
           importStyle: false,
         }),
       ],
-      imports: [
-        'vue',
-        'vue-router',
-        'pinia',
-      ],
+      imports: ['vue', 'vue-router', 'pinia'],
       dts: 'src/auto-imports.d.ts',
     }),
   ],

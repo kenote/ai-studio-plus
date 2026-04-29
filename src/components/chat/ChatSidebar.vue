@@ -85,6 +85,11 @@ const chats = ref<Chat[]>([])
 
 const loadChats = async () => {
   const list = await db.chats.orderBy('updatedAt').reverse().toArray()
+  if (list.length === 0) {
+    chats.value = []
+    router.push('/chat')
+    return
+  }
 
   // 使用 Promise.all 等待数组中所有的异步 getChatName 执行完毕
   chats.value = await Promise.all(
@@ -96,13 +101,10 @@ const loadChats = async () => {
 }
 
 const deleteChat = async (chat: Chat) => {
-  console.log(chat.id)
   if (chat.id) {
     const index = chats.value.findIndex((v) => v.id === chat.id)
     const nextIndex = chats.value.length <= index + 1 ? index - 1 : index + 1
-    console.log(chats.value.length, index, nextIndex)
     const newChatId = chats.value?.[nextIndex]?.id
-    console.log('newChatId', newChatId)
     await db.chats.delete(chat.id)
     await db.messages.where('chatId').equals(chat.id).delete()
     await loadChats()
@@ -122,6 +124,7 @@ onMounted(() => {
   checkCollapsed()
   emitter.on(Events.TOGGLE_SIDEBAR, handleToggle)
   emitter.on(Events.CHAT_CHANGE, loadChats)
+  emitter.on(Events.DATA_CHANGE, loadChats)
 })
 
 watch(width, (newWidth) => {
@@ -135,6 +138,7 @@ watch(width, (newWidth) => {
 onUnmounted(() => {
   emitter.off(Events.TOGGLE_SIDEBAR, handleToggle)
   emitter.off(Events.CHAT_CHANGE, loadChats)
+  emitter.off(Events.DATA_CHANGE, loadChats)
 })
 </script>
 

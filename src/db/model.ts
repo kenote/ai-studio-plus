@@ -10,7 +10,6 @@ export async function getModelInfo(modelId: number): Promise<ModelInfo | undefin
   }
   const { apiBase } = (await db.providers.get(model?.providerId))!
   const { apiKey } = (await db.groups.get(model?.groupId))!
-  console.log('Model Info - Name:', model.name, 'API Base:', apiBase, 'API Key:', apiKey)
   return {
     modelName: model.name,
     apiBase: toOpenaiURL(apiBase),

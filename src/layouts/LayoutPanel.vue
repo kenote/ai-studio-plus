@@ -54,7 +54,7 @@
         </div>
       </nav>
     </el-header>
-    <el-main class="h-full !p-0 !overflow-y-auto !overflow-x-hidden">
+    <el-main class="h-full !p-0 !overflow-y-auto">
       <slot></slot>
     </el-main>
   </el-container>

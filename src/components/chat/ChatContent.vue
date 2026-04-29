@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-content h-full flex flex-col">
+  <div class="chat-content h-full flex flex-col !overflow-x-auto min-w-3xl">
     <el-scrollbar class="flex-1 !overflow-y-auto !overflow-x-hidden w-full position-relative">
       <div
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
@@ -25,6 +25,9 @@
             :model-name="msg.modelFullName!"
             :is-thinking="isThinking === msg.id"
             :open-search="openSearch"
+            :msg-id="msg.id"
+            :error="msg.error"
+            @resend="handleResend"
           />
         </div>
       </div>
@@ -61,12 +64,8 @@
               </el-tooltip>
             </div>
             <div class="mr-3 flex gap-2">
-              <div class="w-[240px]">
-                <ModelSelect
-                  v-model="selectedModelId"
-                  :model-groups="modelGroups"
-                  @update:model-value="onModelChange"
-                />
+              <div class="w-[260px]">
+                <ModelSelect v-model="selectedModelId" :model-groups="modelGroups" />
               </div>
               <el-button
                 type="info"
@@ -142,6 +141,14 @@ const openSearch = ref<boolean>(true)
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
 
+const handleResend = (msgId: number) => {
+  const index = messages.value.findIndex((v) => v.id === msgId)
+  const assistantMsg = messages.value[index + 1]!
+  set(assistantMsg, 'content', '')
+  set(assistantMsg, 'error', undefined)
+  sendMessage(assistantMsg.id)
+}
+
 /**
  * 发送请求
  */
@@ -186,14 +193,14 @@ const handleSend = async (evt?: Event | KeyboardEvent) => {
  * @param id
  */
 const sendMessage = async (id?: number) => {
+  let assistantId = id
   try {
-    let assistantId = id
-    const msgs = id ? messages.value.slice(0, -1) : messages.value
+    const index = id ? messages.value.findIndex((item) => item.id === id) : -1
+    const msgs = id ? messages.value.slice(0, index) : messages.value
     // 联网搜索
     await getSearchContent(msgs, openSearch.value)
     // 获取请求参数
     const options = await getRequestConfig(selectedModelId.value!, msgs, stream.value)
-    console.log(options)
     // 生成回复的信息ID
     if (!id) {
       const modelFullName = await getModelFullName(selectedModelId.value!)
@@ -201,25 +208,23 @@ const sendMessage = async (id?: number) => {
         { modelId: selectedModelId.value, modelFullName },
         'assistant',
       )
-      console.log('assistantId', assistantId)
     }
     // 发送聊天请求
     isThinking.value = assistantId!
     const delta = await useChatStream(options, '/chat/completions', streamCallback(assistantId!))
     // 处理非流式请求返回结果
     if (delta) {
-      console.log('result:', delta)
       await updateMessage({ content: delta }, 'assistant', assistantId)
       isThinking.value = 0
     }
   } catch (error) {
-    console.log(error)
     if (error instanceof Error) {
       ElMessage.warning(error.message)
+      await updateMessage({ error, content: '' }, 'assistant', assistantId)
     }
     isThinking.value = 0
   }
-  scrollToBottom()
+  // scrollToBottom()
 }
 
 /**
@@ -230,7 +235,6 @@ const streamCallback = (assistantId: number) => {
   let longContent = ''
   let lastUpdateTime = 0
   return async (content: string, status: string) => {
-    console.log(status, content)
     longContent += content
 
     // 1. 立即同步到 UI 内存（保证响应式跳动流畅）
@@ -247,13 +251,13 @@ const streamCallback = (assistantId: number) => {
       if (status === 'stop') {
         isThinking.value = 0
       }
-      scrollToBottom()
+      // scrollToBottom()
     }
 
     if (status === 'error') {
-      await updateMessage({ error: longContent }, 'assistant', assistantId)
+      await updateMessage({ error: new Error(longContent) }, 'assistant', assistantId)
       isThinking.value = 0
-      scrollToBottom()
+      // scrollToBottom()
     }
   }
 }
@@ -295,7 +299,7 @@ const updateMessage = async (
     messageId = await db.messages.add(newMessage)
     messages.value.push({ ...newMessage, id: messageId })
   }
-  scrollToBottom()
+  scrollToAssistant(messageId!)
   return messageId
 }
 
@@ -314,7 +318,7 @@ const loadMessages = async () => {
   }
   selectedModelId.value = props.chat.modelId
   messages.value = await db.messages.where('chatId').equals(props.chat?.id).sortBy('id')
-  scrollToBottom()
+  // scrollToBottom()
   clearValues()
   if (!last(messages.value)?.content) {
     // 检查上次未完成请求
@@ -337,14 +341,22 @@ const scrollToBottom = () => {
   setTimeout(() => {
     const el = document.querySelector('.chat-content .el-scrollbar__wrap')
     if (el) {
-      el.scrollTop = el.scrollHeight
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
     }
   }, 100)
 }
 
-const onModelChange = async (modelId: number) => {
-  console.log(modelId)
-  if (!props.chat?.id) return
+/**
+ * 滚动到指定消息位置
+ * @param id
+ */
+const scrollToAssistant = (id: number) => {
+  setTimeout(() => {
+    const el = document.querySelector(`.chat-content #msg-${id}`)
+    if (el) {
+      el.scrollIntoView({ block: 'end', behavior: 'smooth' })
+    }
+  }, 100)
 }
 
 watch(
@@ -352,6 +364,7 @@ watch(
   (value: number | undefined, oldValue: number | undefined) => {
     if (value === oldValue) return
     loadMessages()
+    scrollToBottom()
   },
 )
 watch(
@@ -370,7 +383,6 @@ onMounted(async () => {
     loadMessages()
   })
   scrollToBottom()
-  console.log(import.meta.env)
 })
 </script>
 

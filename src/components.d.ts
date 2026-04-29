@@ -14,6 +14,7 @@ declare module 'vue' {
     AppNavbar: typeof import('./components/AppNavbar.vue')['default']
     ChatContent: typeof import('./components/chat/ChatContent.vue')['default']
     ChatSidebar: typeof import('./components/chat/ChatSidebar.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDialog: typeof import('element-plus/es')['ElDialog']

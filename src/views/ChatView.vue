@@ -27,10 +27,8 @@ const onChatUpdate = (chat: Chat) => {
 
 const loadChat = async () => {
   const id = route.params.id
-  console.log(id)
   if (id) {
     const chat = await db.chats.get(Number(id))
-    console.log(chat)
     if (chat) {
       activeChat.value = chat
       return

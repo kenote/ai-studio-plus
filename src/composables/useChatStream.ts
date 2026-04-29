@@ -45,7 +45,6 @@ export async function useChatStream(
 
         try {
           const parsed = JSON.parse(message)
-          console.log(parsed)
           if (parsed.error) {
             callback?.(parsed.error, 'error')
             break

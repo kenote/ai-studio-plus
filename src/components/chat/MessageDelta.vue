@@ -2,6 +2,7 @@
   <div
     v-if="type === 'assistant'"
     class="min-w-[200px] max-w-[85%] min-w-[280px] rounded-xl px-5 mx-4 py-4 w-full"
+    :id="`msg-${msgId}`"
   >
     <el-progress
       v-if="isThinking"
@@ -10,11 +11,27 @@
       :show-text="false"
       color="#969696"
     />
-    <div class="text-xs text-zinc-400 mb-4">{{ modelName }} · {{ formatDate(createdAt) }}</div>
+    <div class="text-xs text-zinc-400 mb-4 flex justify-between">
+      <span>{{ modelName }} · {{ formatDate(createdAt) }}</span>
+      <div class="flex flex-row-reverse pr-2">
+        <el-tooltip content="复制" placement="top">
+          <el-icon
+            v-if="content"
+            class="m-1 !text-coolgray hover:!text-dark hover:dark:!text-light cursor-pointer"
+            @click="handleCopyContent"
+            ><CopyDocument /></el-icon
+        ></el-tooltip>
+      </div>
+    </div>
     <div v-if="isThinking && openSearch" class="mb-2 text-sm text-coolgray">正在联网搜索...</div>
-    <div class="markdown-body" v-html="renderMarkdown(content)"></div>
+    <el-alert v-if="error" :title="String(error)" type="error" show-icon :closable="false" />
+    <div v-else class="markdown-body" v-html="renderMarkdown(content)"></div>
   </div>
-  <div v-else-if="type === 'user'" class="flex flex-row-reverse rounded-lg px-4 py-2 text-sm">
+  <div
+    v-else-if="type === 'user'"
+    class="flex flex-col items-end rounded-lg px-4 py-2 text-sm"
+    :id="`msg-${msgId}`"
+  >
     <div class="max-w-[85%] min-w-[280px] rounded-xl px-5 py-4 bg-coolgray-50 dark:bg-zinc-800">
       <div class="text-xs text-zinc-400 mb-1">
         {{ formatDate(createdAt) }}
@@ -32,6 +49,20 @@
       </div>
       <div>{{ contentText }}</div>
     </div>
+    <div class="flex flex-row-reverse pr-2">
+      <el-tooltip content="复制" placement="top">
+        <el-icon
+          class="m-1 !text-coolgray hover:!text-dark hover:dark:!text-light cursor-pointer"
+          @click="handleCopyContent"
+          ><CopyDocument /></el-icon
+      ></el-tooltip>
+      <el-tooltip content="重新回答" placement="top">
+        <el-icon
+          class="m-1 !text-coolgray hover:!text-dark hover:dark:!text-light cursor-pointer"
+          @click="handleResend"
+          ><RefreshRight /></el-icon
+      ></el-tooltip>
+    </div>
   </div>
 </template>
 
@@ -42,6 +73,7 @@ import { formatDate } from '@/utils/message'
 import { marked, type Tokens } from 'marked'
 import hljs from 'highlight.js'
 import { isString, isArray, isEqual } from 'lodash-es'
+import { CopyDocument, RefreshRight } from '@element-plus/icons-vue'
 
 const props = withDefaults(
   defineProps<{
@@ -51,6 +83,8 @@ const props = withDefaults(
     modelName?: string
     isThinking?: boolean
     openSearch?: boolean
+    msgId?: number
+    error?: Error
   }>(),
   {
     modelName: '',
@@ -60,6 +94,10 @@ const props = withDefaults(
 
 const imageList = ref<string[]>([])
 const contentText = ref<string>('')
+
+const emit = defineEmits<{
+  resend: [value: number]
+}>()
 
 watch(
   () => props.content,
@@ -104,6 +142,16 @@ const handleCopy = (event: MouseEvent) => {
       }, 2000)
     }
   }
+}
+
+const handleCopyContent = () => {
+  navigator.clipboard.writeText(contentText.value)
+  ElMessage.success('已复制到剪贴板')
+}
+
+const handleResend = () => {
+  if (!props.msgId) return
+  emit('resend', props.msgId)
 }
 
 onMounted(() => {
