@@ -7,8 +7,7 @@ help:
 	@echo "  make install    - Install dependencies"
 	@echo "  make dev        - Start development server"
 	@echo "  make build      - Build for production"
-	@echo "  make lint       - Run linters"
-	@echo "  make preview   - Preview production build"
+	@echo "  make preview    - Preview production build"
 	@echo ""
 	@echo "PM2:"
 	@echo "  make start   - Start with PM2"
@@ -27,13 +26,10 @@ dev:
 	@npm run dev
 
 build:
-	@@npm run build:spa
-
-lint:
-	@npm run lint
+	@npm run build:spa
 
 preview:
-	@npm run preview
+	@node prod.server.mjs
 
 start:
 	@pm2 start prod.server.mjs --name ai-studio-plus && pm2 save

@@ -147,19 +147,19 @@ export async function getSearchContent(msgs: Message[], openSearch: boolean = fa
   } else if (isArray(lsatContent)) {
     query = lsatContent.find((v) => v.type === 'text')?.text ?? ''
   }
-  const rks = await useSearchContent(query)
-  if (rks?.results && rks.results.length > 0) {
+  const results = await useSearchContent(query, 5)
+  if (results.length > 0) {
     let tmpContent: ContentItem[] = []
     if (isString(last(msgs)?.content)) {
       tmpContent.push({ type: 'text', text: last(msgs)?.content as string })
     }
     tmpContent = tmpContent.concat(
-      rks.results.map((v) => ({
+      results.map((v) => ({
         type: 'text',
         text: v.content,
       })),
     )
     set(last(msgs)!, 'content', tmpContent)
   }
-  return rks?.results
+  return results
 }

@@ -26,7 +26,7 @@ export interface TavilySearchResponse {
 export async function useSearchContent(
   query: string,
   maxResults = 10,
-): Promise<TavilySearchResponse | null> {
+): Promise<TavilySearchResult[]> {
   const config = await db.config.get(1)
   let response: Response | null = null
   if (config?.search?.type === 'tavily') {
@@ -58,7 +58,7 @@ export async function useSearchContent(
       }),
     })
   }
-  if (!response) return null
+  if (!response) return []
   if (!response.ok) throw new Error(`请求失败: ${response.status}`)
-  return response.json()
+  return (await (response.json() as Promise<TavilySearchResponse>)).results.slice(0, maxResults)
 }

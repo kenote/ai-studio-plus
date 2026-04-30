@@ -51,7 +51,6 @@
         <el-form-item label="主机" label-width="150px">
           <el-input
             v-model="configForm.search!.searxng"
-            placeholder="https://search.kenote.site"
             @blur="handleSearchChange"
             class="justify-end w-full"
           />
@@ -61,7 +60,6 @@
         <el-form-item label="主机" label-width="150px">
           <el-input
             v-model="configForm.search!.tavily.host"
-            placeholder="https://api.tavily.com"
             @blur="handleSearchChange"
             class="justify-end w-full"
           />
@@ -108,7 +106,6 @@
       <el-form-item label="归档目录" label-width="150px">
         <el-input
           v-model="configForm.joplin.folder"
-          placeholder="AI Studio"
           @blur="handleJoplinChange"
           class="justify-end w-full"
         />
