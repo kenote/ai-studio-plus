@@ -13,10 +13,15 @@
     />
     <div class="text-xs text-zinc-400 mb-4 flex justify-between">
       <span>{{ modelName }} · {{ formatDate(createdAt) }}</span>
-      <div class="flex flex-row-reverse pr-2">
+      <div v-if="content" class="flex flex-row-reverse pr-2">
+        <el-tooltip v-if="archive && joplin?.token" content="归档到 Joplin" placement="top">
+          <el-image
+            class="m-1 h-[14px] w-[14px] text-zinc-400 hover:text-zinc-600"
+            src="/250px-Joplin-icon.svg.png"
+            @click="handleArchiveJoplin"
+        /></el-tooltip>
         <el-tooltip content="复制" placement="top">
           <el-icon
-            v-if="content"
             class="m-1 !text-coolgray hover:!text-dark hover:dark:!text-light cursor-pointer"
             @click="handleCopyContent"
             ><CopyDocument /></el-icon
@@ -26,6 +31,24 @@
     <div v-if="isThinking && openSearch" class="mb-2 text-sm text-coolgray">正在联网搜索...</div>
     <el-alert v-if="error" :title="String(error)" type="error" show-icon :closable="false" />
     <div v-else class="markdown-body" v-html="renderMarkdown(content)"></div>
+    <el-dialog
+      v-model="archiveDialogVisible"
+      title="归档到 Joplin"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <el-form @submit.prevent="handleArchiveConfirm">
+        <el-form-item>
+          <el-input v-model="archiveTitle" placeholder="输入笔记标题" :disabled="archiveLoading" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="archiveDialogVisible = false" :disabled="archiveLoading">取消</el-button>
+        <el-button type="primary" :loading="archiveLoading" @click="handleArchiveConfirm"
+          >确定</el-button
+        >
+      </template>
+    </el-dialog>
   </div>
   <div
     v-else-if="type === 'user'"
@@ -74,6 +97,7 @@ import { marked, type Tokens } from 'marked'
 import hljs from 'highlight.js'
 import { isString, isArray, isEqual } from 'lodash-es'
 import { CopyDocument, RefreshRight } from '@element-plus/icons-vue'
+import { saveJoplin } from '@/utils/joplin'
 
 const props = withDefaults(
   defineProps<{
@@ -85,6 +109,12 @@ const props = withDefaults(
     openSearch?: boolean
     msgId?: number
     error?: Error
+    joplin?: {
+      host?: string
+      token: string
+      folder?: string
+    }
+    archive?: boolean
   }>(),
   {
     modelName: '',
@@ -94,6 +124,9 @@ const props = withDefaults(
 
 const imageList = ref<string[]>([])
 const contentText = ref<string>('')
+const archiveDialogVisible = ref(false)
+const archiveTitle = ref('')
+const archiveLoading = ref(false)
 
 const emit = defineEmits<{
   resend: [value: number]
@@ -152,6 +185,41 @@ const handleCopyContent = () => {
 const handleResend = () => {
   if (!props.msgId) return
   emit('resend', props.msgId)
+}
+
+const handleArchiveJoplin = () => {
+  // archiveTitle.value = contentText.value.slice(0, 30)
+  archiveDialogVisible.value = true
+}
+
+const validateArchiveTitle = (value: string) => {
+  if (!value || !value.trim()) {
+    return '标题不能为空'
+  }
+  if (/[\\/:*?"<>|]/.test(value)) {
+    return '标题不能包含特殊字符 \\ / : * ? " < > |'
+  }
+  return true
+}
+
+const handleArchiveConfirm = async () => {
+  const errorMsg = validateArchiveTitle(archiveTitle.value)
+  if (errorMsg !== true) {
+    ElMessage.error(errorMsg)
+    return
+  }
+  archiveLoading.value = true
+  try {
+    await saveJoplin(archiveTitle.value, contentText.value, props.joplin!)
+    archiveDialogVisible.value = false
+    ElMessage.success(`已归档到 Joplin 笔记中`)
+  } catch (error) {
+    if (error instanceof Error) {
+      ElMessage.error(error.message ?? error.name)
+    }
+  } finally {
+    archiveLoading.value = false
+  }
 }
 
 onMounted(() => {

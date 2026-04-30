@@ -25,6 +25,8 @@
             :model-name="msg.modelFullName!"
             :is-thinking="isThinking === msg.id"
             :open-search="openSearch"
+            :archive="archive"
+            :joplin="joplinConfig"
             :msg-id="msg.id"
             :error="msg.error"
             @resend="handleResend"
@@ -137,7 +139,13 @@ const imageList = ref<ImageFile[]>([])
 const stream = ref<boolean>(true)
 const isThinking = ref<number>(0)
 const chatName = ref('')
-const openSearch = ref<boolean>(true)
+const openSearch = ref<boolean>(false)
+const joplinConfig = ref<{
+  host?: string
+  token: string
+  folder?: string
+}>()
+const archive = ref<boolean>(false)
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
 
@@ -309,6 +317,8 @@ const updateMessage = async (
 const loadMessages = async () => {
   const config = await db.config.get(1)
   openSearch.value = config?.search?.open || false
+  joplinConfig.value = config?.joplin
+  archive.value = config?.archive || false
   chatName.value = (await getChatName(props.chat!))!
   if (!props.chat?.id) {
     selectedModelId.value = modelGroups.value[0]?.models[0]?.id
