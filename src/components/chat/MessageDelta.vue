@@ -213,6 +213,7 @@ const handleArchiveConfirm = async () => {
   try {
     await saveJoplin(archiveTitle.value, contentText.value, props.joplin!)
     archiveDialogVisible.value = false
+    archiveLoading.value = false
     ElMessage.success(`已归档到 Joplin 笔记中`)
   } catch (error) {
     if (error instanceof Error) {
