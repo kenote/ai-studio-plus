@@ -23,6 +23,7 @@ type Note = {
   // 根据 API 实际返回字段补充
 }
 
+const defaultBaseURL = 'http://localhost:41184'
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
 /**
@@ -40,10 +41,10 @@ export async function saveJoplin(
   const { host, token, folder } = options
 
   // 1. 获取或创建父级笔记本ID，默认名称可以统一定义
-  const parentId = await getOrCreateNotebookId(folder ?? 'AI Studio Archives', options)
+  const parentId = await getOrCreateNotebookId(folder || 'AI Studio', options)
 
   // 2. 构造请求 URL，使用URL对象更稳健
-  const url = new URL('/notes', host)
+  const url = new URL('/notes', host || defaultBaseURL)
   url.searchParams.set('token', token)
 
   // 3. 发起创建笔记请求
@@ -75,7 +76,7 @@ export async function saveJoplin(
 async function searchFolder(query: string, options: JoplinConfig): Promise<Folder[]> {
   const { host, token } = options
 
-  const url = new URL('/search', host)
+  const url = new URL('/search', host || defaultBaseURL)
   url.searchParams.set('query', query)
   url.searchParams.set('type', 'folder')
   url.searchParams.set('token', token)
@@ -97,8 +98,9 @@ async function searchFolder(query: string, options: JoplinConfig): Promise<Folde
  * @returns
  */
 async function createFolder(title: string, options: JoplinConfig): Promise<Folder> {
-  const url = new URL('/folders', options.host)
-  url.searchParams.set('token', options.token)
+  const { host, token } = options
+  const url = new URL('/folders', host || defaultBaseURL)
+  url.searchParams.set('token', token)
 
   const response = await fetch(url.toString(), {
     method: 'POST',
