@@ -1,12 +1,16 @@
 <template>
   <div class="chat-content h-full flex flex-col !overflow-x-auto min-w-3xl">
-    <el-scrollbar class="flex-1 !overflow-y-auto !overflow-x-hidden w-full position-relative">
+    <el-scrollbar
+      ref="scrollbarRef"
+      class="flex-1 !overflow-y-auto !overflow-x-hidden w-full position-relative"
+      @scroll="handleScroll"
+    >
       <div
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
       >
         <div class="w-[2px] pl-6"></div>
         <div
-          class="truncate max-w-2xl cursor-text border border-transparent hover:border-blue-400 px-2 py-0.5 rounded outline-none"
+          class="truncate font-500 text-[18px] max-w-2xl cursor-text border border-transparent hover:border-blue-400 px-2 py-0.5 rounded outline-none"
           contenteditable="true"
           @blur="handleNameBlur"
           @keydown.enter.prevent="handleNameBlur"
@@ -14,7 +18,38 @@
         >
           {{ chatName }}
         </div>
-        <div class="w-[20px] pr-6"></div>
+
+        <div class="w-[20px] pr-6">
+          <el-popover
+            placement="bottom-end"
+            :width="320"
+            trigger="click"
+            v-if="messages.length > 0"
+          >
+            <template #reference>
+              <el-icon class="cursor-pointer text-zinc-500 hover:text-zinc-700 mr-4"
+                ><Document
+              /></el-icon>
+            </template>
+            <div class="max-h-[400px] overflow-y-auto">
+              <div class="text-xs text-zinc-400 mb-2 px-2">消息大纲</div>
+              <template v-for="(msg, index) in messages">
+                <div
+                  v-if="msg.role === 'user'"
+                  :key="index"
+                  class="text-sm px-2 py-1.5 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded truncate"
+                  :class="msg.role === 'user' ? 'text-left' : 'text-right text-zinc-400'"
+                  @click="scrollToMessage(index)"
+                >
+                  <span>{{ getMessageSummary(msg.content) }}</span>
+                </div>
+              </template>
+              <div v-if="messages.length === 0" class="text-center text-zinc-400 text-sm py-4">
+                暂无消息
+              </div>
+            </div>
+          </el-popover>
+        </div>
       </div>
       <div class="p-4 space-y-4 max-w-4xl mx-auto mt-20">
         <div v-if="messages.length === 0" class="text-center text-zinc-400 text-sm py-8">
@@ -47,6 +82,15 @@
       class="border-t min-h-[160px] max-w-4xl w-stretch border-zinc-200 dark:border-zinc-800 p-3"
     >
       <div class="mx-auto max-w-4xl relative">
+        <el-button
+          v-show="showScrollButton"
+          type="info"
+          :icon="Bottom"
+          circle
+          dashed
+          class="!rounded-1 dark:!bg-zinc-600 dark:hover:!bg-zinc-700 !border-0 absolute top-[-40px] left-[50%]"
+          @click="scrollToBottom"
+        />
         <div
           class="border border-zinc-200 dark:border-zinc-800 border-solid rounded-xl p-[8px_2px] bg-coolgray-50 dark:bg-zinc-800"
         >
@@ -112,7 +156,7 @@ import { ref, onMounted, watch } from 'vue'
 import type { Chat, Message, ContentItem, TextContent, ImageContent } from '@/types/chat'
 import { db } from '@/db'
 import ModelSelect from './ModelSelect.vue'
-import { Top, Plus } from '@element-plus/icons-vue'
+import { Top, Plus, Document, Bottom } from '@element-plus/icons-vue'
 import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
@@ -153,28 +197,71 @@ const joplinConfig = ref<{
   token: string
   folder?: string
 }>()
+const showScrollButton = ref(false)
+const scrollbarRef = ref()
 const archive = ref<boolean>(false)
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
 
 const handleNameBlur = async (evt: FocusEvent) => {
-  const target = evt.target as HTMLElement
-  const newTitle = target.innerText.trim()
-  if (newTitle && newTitle !== chatName.value) {
-    const chatId = props.chat?.id
-    if (chatId) {
-      await db.chats.update(chatId, { title: newTitle })
-      chatName.value = newTitle
-      emitter.emit(Events.CHAT_CHANGE)
+  try {
+    const target = evt.target as HTMLElement
+    if (!target) return
+    const newTitle = target.innerText?.trim() || ''
+    if (newTitle && newTitle !== chatName.value) {
+      const chatId = props.chat?.id
+      if (chatId) {
+        await db.chats.update(chatId, { title: newTitle })
+        chatName.value = newTitle
+        emitter.emit(Events.CHAT_CHANGE)
+      }
+    } else if (!newTitle) {
+      target.innerText = chatName.value
     }
-  } else {
-    target.innerText = chatName.value
+  } catch {
+    // ignore
   }
 }
 
 const handleNameCancel = (evt: KeyboardEvent) => {
-  const target = evt.target as HTMLElement
-  target.innerText = chatName.value
+  try {
+    const target = evt.target as HTMLElement
+    if (!target) return
+    target.innerText = chatName.value
+  } catch {
+    // ignore
+  }
+}
+
+const handleScroll = () => {
+  const wrap = scrollbarRef.value?.$el?.querySelector('.el-scrollbar__wrap')
+  if (!wrap) return
+  const distanceToBottom = wrap.scrollHeight - wrap.scrollTop - wrap.clientHeight
+  showScrollButton.value = distanceToBottom > 400
+}
+
+const getMessageSummary = (content: string | ImageContent | ContentItem[]): string => {
+  if (typeof content === 'string') {
+    return content.slice(0, 50)
+  }
+  if (Array.isArray(content)) {
+    const textItem = content.find((item) => item.type === 'text')
+    return textItem ? (textItem as { type: string; text: string }).text.slice(0, 50) : '图片消息'
+  }
+  if ((content as { type: string }).type === 'image_url') {
+    return '图片消息'
+  }
+  return ''
+}
+
+const scrollToMessage = (index: number) => {
+  const msgId = messages.value[index]?.id
+  if (msgId) {
+    const el = document.getElementById(`msg-${msgId}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
 }
 
 const handleResend = (msgId: number) => {

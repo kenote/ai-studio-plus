@@ -203,6 +203,7 @@ const validateArchiveTitle = (value: string) => {
 }
 
 const handleArchiveConfirm = async () => {
+  if (!archiveDialogVisible.value) return
   const errorMsg = validateArchiveTitle(archiveTitle.value)
   if (errorMsg !== true) {
     ElMessage.error(errorMsg)
@@ -218,7 +219,9 @@ const handleArchiveConfirm = async () => {
       ElMessage.error(error.message ?? error.name)
     }
   } finally {
-    archiveLoading.value = false
+    if (archiveDialogVisible.value) {
+      archiveLoading.value = false
+    }
   }
 }
 
@@ -251,7 +254,11 @@ marked.use({ renderer })
 
 const renderMarkdown = (content: string | ImageContent | ContentItem[]) => {
   if (typeof content === 'string') {
-    return marked(content)
+    try {
+      return marked(content) || ''
+    } catch {
+      return content
+    }
   }
   return ''
 }
