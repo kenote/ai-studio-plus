@@ -70,7 +70,7 @@
           />
         </template>
       </div>
-      <div>{{ contentText }}</div>
+      <div class="line-clamp-3">{{ contentText }}</div>
     </div>
     <div class="flex flex-row-reverse pr-2">
       <el-tooltip content="复制" placement="top">

@@ -5,7 +5,15 @@
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
       >
         <div class="w-[2px] pl-6"></div>
-        <div class="truncate max-w-2xl">{{ chatName }}</div>
+        <div
+          class="truncate max-w-2xl cursor-text border border-transparent hover:border-blue-400 px-2 py-0.5 rounded outline-none"
+          contenteditable="true"
+          @blur="handleNameBlur"
+          @keydown.enter.prevent="handleNameBlur"
+          @keydown.escape="handleNameCancel"
+        >
+          {{ chatName }}
+        </div>
         <div class="w-[20px] pr-6"></div>
       </div>
       <div class="p-4 space-y-4 max-w-4xl mx-auto mt-20">
@@ -148,6 +156,26 @@ const joplinConfig = ref<{
 const archive = ref<boolean>(false)
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
+
+const handleNameBlur = async (evt: FocusEvent) => {
+  const target = evt.target as HTMLElement
+  const newTitle = target.innerText.trim()
+  if (newTitle && newTitle !== chatName.value) {
+    const chatId = props.chat?.id
+    if (chatId) {
+      await db.chats.update(chatId, { title: newTitle })
+      chatName.value = newTitle
+      emitter.emit(Events.CHAT_CHANGE)
+    }
+  } else {
+    target.innerText = chatName.value
+  }
+}
+
+const handleNameCancel = (evt: KeyboardEvent) => {
+  const target = evt.target as HTMLElement
+  target.innerText = chatName.value
+}
 
 const handleResend = (msgId: number) => {
   const index = messages.value.findIndex((v) => v.id === msgId)
