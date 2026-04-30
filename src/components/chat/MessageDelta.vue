@@ -13,10 +13,10 @@
     />
     <div class="text-xs text-zinc-400 mb-4 flex justify-between">
       <span>{{ modelName }} · {{ formatDate(createdAt) }}</span>
-      <div v-if="content" class="flex flex-row-reverse pr-2">
+      <div v-if="content" class="flex flex-row-reverse pr-2 text-sm">
         <el-tooltip v-if="archive && joplin?.token" content="归档到 Joplin" placement="top">
           <el-image
-            class="m-1 h-[14px] w-[14px] text-zinc-400 hover:text-zinc-600"
+            class="m-1 h-[16px] w-[16px] text-zinc-400 hover:text-zinc-600"
             src="/250px-Joplin-icon.svg.png"
             @click="handleArchiveJoplin"
         /></el-tooltip>
