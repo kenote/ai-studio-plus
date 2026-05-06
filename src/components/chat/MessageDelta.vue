@@ -188,7 +188,7 @@ const handleResend = () => {
 }
 
 const handleArchiveJoplin = () => {
-  // archiveTitle.value = contentText.value.slice(0, 30)
+  archiveTitle.value = ''
   archiveDialogVisible.value = true
 }
 
@@ -211,7 +211,8 @@ const handleArchiveConfirm = async () => {
   }
   archiveLoading.value = true
   try {
-    await saveJoplin(archiveTitle.value, contentText.value, props.joplin!)
+    const content = `---\n> model: ${props.modelName}\n>created: ${new Date(props.createdAt).toISOString()}\n---\n# ${archiveTitle.value}\n${contentText.value}`
+    await saveJoplin(archiveTitle.value, content, props.joplin!)
     archiveDialogVisible.value = false
     archiveLoading.value = false
     ElMessage.success(`已归档到 Joplin 笔记中`)
