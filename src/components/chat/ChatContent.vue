@@ -148,18 +148,23 @@
           />
           <div class="h-8 p-[8px_2px] flex items-center justify-between">
             <div class="ml-3 flex gap-2">
-              <el-tooltip content="上传图片" placement="top">
-                <el-button
-                  type="info"
-                  circle
-                  class="!rounded-1 !border-0 !bg-transparent hover:!bg-zinc-200 dark:hover:!bg-zinc-700 !c-black !dark:c-white"
-                  @click="loadImage(imageList)"
-                >
-                  <template #icon>
-                    <el-icon class="!text-4"><Plus /></el-icon>
-                  </template>
-                </el-button>
-              </el-tooltip>
+              <el-button
+                type="info"
+                circle
+                class="!rounded-1 !border-0 !bg-transparent hover:!bg-zinc-200 dark:hover:!bg-zinc-700 !c-black !dark:c-white"
+                @click="loadImage(imageList)"
+              >
+                <template #icon>
+                  <el-icon class="!text-4"><Plus /></el-icon>
+                </template>
+              </el-button>
+
+              <el-check-tag
+                :checked="openSearch"
+                class="!px-[8px] !py-[7px] !text-[18px] !bg-transparent hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
+                @change="openSearch = !openSearch"
+                ><el-icon><ChromeFilled /></el-icon
+              ></el-check-tag>
             </div>
             <div class="mr-3 flex gap-2">
               <div class="w-[200px]">
@@ -200,7 +205,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import type { Chat, Message, ContentItem, TextContent, ImageContent, Assistant } from '@/types/chat'
 import { db } from '@/db'
 import ModelSelect from './ModelSelect.vue'
-import { Top, Plus, Document, Bottom, ArrowDown } from '@element-plus/icons-vue'
+import { Top, Plus, Document, Bottom, ArrowDown, ChromeFilled } from '@element-plus/icons-vue'
 import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
@@ -513,7 +518,7 @@ const updateMessage = async (
  */
 const loadMessages = async () => {
   const config = await db.config.get(1)
-  openSearch.value = config?.search?.open || false
+  // openSearch.value = config?.search?.open || false
   joplinConfig.value = config?.joplin
   archive.value = config?.archive || false
   chatName.value = (await getChatName(props.chat!))!

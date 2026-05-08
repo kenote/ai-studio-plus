@@ -2,7 +2,7 @@
   <el-select
     :model-value="modelValue"
     placeholder="选择模型"
-    class="w-64"
+    class="w-50"
     @update:model-value="onChange"
   >
     <el-option-group v-for="group in modelGroups" :key="group.groupName" :label="group.groupName">

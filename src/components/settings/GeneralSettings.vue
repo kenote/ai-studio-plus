@@ -25,13 +25,13 @@
       <el-divider />
       <div class="flex items-center gap-2 justify-between">
         <span>联网搜索</span>
-        <el-form-item class="!mb-0 w-[40px]">
+        <!-- <el-form-item class="!mb-0 w-[40px]">
           <el-switch
             v-model="configForm.search!.open"
             @change="handleSearchChange"
             class="justify-end w-full"
           />
-        </el-form-item>
+        </el-form-item> -->
       </div>
       <div class="flex items-center gap-2 justify-between">
         <span>提供方</span>

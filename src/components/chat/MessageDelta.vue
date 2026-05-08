@@ -87,7 +87,10 @@
       ></el-tooltip>
     </div>
   </div>
-  <div v-else-if="type === 'system'" class="flex items-center justify-center text-sm my-4 w-full">
+  <div
+    v-else-if="type === 'system' && msgId"
+    class="flex items-center justify-center text-sm my-4 w-full"
+  >
     <!-- <div> -->
     <!-- {{ assistant?.name || '' }} -->
     <el-collapse class="w-[90%]">
