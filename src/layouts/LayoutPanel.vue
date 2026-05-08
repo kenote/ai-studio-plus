@@ -62,7 +62,7 @@
   <el-dialog
     v-model="showSettings"
     width="960px"
-    :close-on-click-modal="false"
+    :close-on-click-modal="true"
     :close-on-press-escape="false"
     show-close
     destroy-on-close
@@ -100,6 +100,13 @@
             >
               系统映射
             </li>
+            <li
+              class="ml-0 px-3 py-2 rounded cursor-pointer text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
+              :class="activeMenu === 'assistant' ? 'bg-zinc-100 dark:bg-zinc-800' : ''"
+              @click="activeMenu = 'assistant'"
+            >
+              聊天助手
+            </li>
             <li class="ml-0 px-1 py-2 text-sm font-900">服务器</li>
             <li
               class="ml-0 px-3 py-2 rounded cursor-pointer text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800"
@@ -124,6 +131,7 @@
             <GeneralSettings v-if="activeMenu === 'general'" />
             <NameFilterSettings v-else-if="activeMenu === 'filter'" />
             <MappingSettings v-else-if="activeMenu === 'mapping'" />
+            <AssistantSettings v-else-if="activeMenu === 'assistant'" />
             <ProviderSettings v-else-if="activeMenu === 'provider'" />
             <ModelSettings v-else-if="activeMenu === 'model'" />
           </el-scrollbar>
@@ -139,6 +147,7 @@ import AppNavbar from '@/components/AppNavbar.vue'
 import GeneralSettings from '@/components/settings/GeneralSettings.vue'
 import NameFilterSettings from '@/components/settings/NameFilterSettings.vue'
 import MappingSettings from '@/components/settings/MappingSettings.vue'
+import AssistantSettings from '@/components/settings/AssistantSettings.vue'
 import ProviderSettings from '@/components/settings/ProviderSettings.vue'
 import ModelSettings from '@/components/settings/ModelSettings.vue'
 import { db } from '@/db'

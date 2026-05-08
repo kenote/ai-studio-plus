@@ -157,6 +157,7 @@ const handleDelete = async (row: IFilterTable) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
+      modalClass: '!z-3000',
     })
     if (row.id !== undefined) {
       await db.filters.delete(row.id)

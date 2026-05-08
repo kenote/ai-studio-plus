@@ -16,6 +16,7 @@ export declare interface Chat {
   createdAt: number
   updatedAt: number
   activeAt: number
+  assistantId?: number
 }
 
 /** 消息内容项 */
@@ -43,4 +44,10 @@ type TextContent = {
 type ImageContent = {
   type: 'image_url'
   image_url: { url: string }
+}
+
+export declare type Assistant = {
+  id?: number
+  name: string
+  content: string
 }

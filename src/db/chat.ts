@@ -7,7 +7,11 @@ export async function getChatName(chat: Chat, defaultName: string = '新会话')
     if (chat.title) {
       return chat.title
     }
-    const message = await db.messages.where('chatId').equals(chat.id!).first()
+    const message = await db.messages
+      .where('chatId')
+      .equals(chat.id!)
+      .filter((m) => m.role === 'user')
+      .first()
     if (isArray(message?.content)) {
       const content = map(
         message.content.filter((v) => v.type === 'text'),

@@ -10,6 +10,7 @@
       >
         <div class="w-[2px] pl-6"></div>
         <div
+          v-if="chat?.id"
           class="truncate font-500 text-[18px] max-w-2xl cursor-text border border-transparent hover:border-blue-400 px-2 py-0.5 rounded outline-none"
           contenteditable="true"
           @blur="handleNameBlur"
@@ -19,12 +20,12 @@
           {{ chatName }}
         </div>
 
-        <div class="w-[20px] pr-6">
+        <div class="w-[20px] pr-6" v-if="chat?.id">
           <el-popover
             placement="bottom-end"
             :width="320"
             trigger="click"
-            v-if="messages.length > 0"
+            v-if="messages.filter((v) => v.role === 'user').length > 0"
           >
             <template #reference>
               <el-icon class="cursor-pointer text-zinc-500 hover:text-zinc-700 mr-4"
@@ -50,6 +51,48 @@
             </div>
           </el-popover>
         </div>
+
+        <div class="pr-6 flex items-center" v-else>
+          <el-dropdown
+            v-if="assistants.length > 0"
+            ref="assistantDropdownRef"
+            trigger="click"
+            @command="handleAssistantCommand"
+          >
+            <span class="el-dropdown-link">
+              {{ selectedAssistantName }}<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </span>
+            <template #dropdown>
+              <div class="p-2 w-64">
+                <div
+                  class="p-3 mb-2 rounded border border-zinc-200 dark:border-zinc-700 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                  :class="
+                    !selectedAssistantId ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20' : ''
+                  "
+                  @click="handleAssistantCommand(undefined)"
+                >
+                  <div class="font-medium text-zinc-400">不使用助手</div>
+                </div>
+                <div
+                  v-for="assistant in assistants"
+                  :key="assistant.id"
+                  class="p-3 mb-2 rounded border border-zinc-200 dark:border-zinc-700 cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-700"
+                  :class="
+                    selectedAssistantId === assistant.id
+                      ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : ''
+                  "
+                  @click="handleAssistantCommand(assistant.id)"
+                >
+                  <div class="font-medium">{{ assistant.name }}</div>
+                  <div v-if="assistant.content" class="text-xs text-zinc-500 mt-1 line-clamp-2">
+                    {{ assistant.content }}
+                  </div>
+                </div>
+              </div>
+            </template>
+          </el-dropdown>
+        </div>
       </div>
       <div class="p-4 space-y-4 max-w-4xl mx-auto mt-20">
         <div v-if="messages.length === 0" class="text-center text-zinc-400 text-sm py-8">
@@ -72,6 +115,7 @@
             :joplin="joplinConfig"
             :msg-id="msg.id"
             :error="msg.error"
+            :assistant="assistants.find((v) => v.id === chat?.assistantId)"
             @resend="handleResend"
           />
         </div>
@@ -118,7 +162,7 @@
               </el-tooltip>
             </div>
             <div class="mr-3 flex gap-2">
-              <div class="w-[260px]">
+              <div class="w-[200px]">
                 <ModelSelect v-model="selectedModelId" :model-groups="modelGroups" />
               </div>
               <el-button
@@ -152,11 +196,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import type { Chat, Message, ContentItem, TextContent, ImageContent } from '@/types/chat'
+import { ref, computed, onMounted, watch } from 'vue'
+import type { Chat, Message, ContentItem, TextContent, ImageContent, Assistant } from '@/types/chat'
 import { db } from '@/db'
 import ModelSelect from './ModelSelect.vue'
-import { Top, Plus, Document, Bottom } from '@element-plus/icons-vue'
+import { Top, Plus, Document, Bottom, ArrowDown } from '@element-plus/icons-vue'
 import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
@@ -187,6 +231,32 @@ const modelGroups = ref<ModelGroup[]>([])
 const messages = ref<Message[]>([])
 const inputMessage = ref('')
 const selectedModelId = ref<number>()
+const selectedAssistantId = ref<number>()
+const assistants = ref<Assistant[]>([])
+
+const selectedAssistantName = computed(() => {
+  if (!selectedAssistantId.value) return '不使用助手'
+  const assistant = assistants.value.find((a) => a.id === selectedAssistantId.value)
+  return assistant?.name || '不使用助手'
+})
+
+const handleAssistantCommand = (command: number | undefined) => {
+  selectedAssistantId.value = command
+  assistantDropdownRef.value?.handleClose()
+  if (command) {
+    const assistant = assistants.value.find((a) => a.id === command)
+    messages.value = [
+      {
+        role: 'system',
+        content: assistant?.content || '',
+      },
+    ]
+    ElMessage.success(`已选择助手：${assistant?.name}`)
+  } else {
+    messages.value = []
+    ElMessage.success('已取消助手')
+  }
+}
 const imageList = ref<ImageFile[]>([])
 const stream = ref<boolean>(true)
 const isThinking = ref<number>(0)
@@ -199,6 +269,7 @@ const joplinConfig = ref<{
 }>()
 const showScrollButton = ref(false)
 const scrollbarRef = ref()
+const assistantDropdownRef = ref()
 const archive = ref<boolean>(false)
 
 const UPDATE_INTERVAL = 1500 // 每 300ms 存一次盘
@@ -294,6 +365,16 @@ const handleSend = async (evt?: Event | KeyboardEvent) => {
   }
   // 清除输入区
   clearValues()
+  // 保存助手提示词
+  const assistant = assistants.value.find((a) => a.id === selectedAssistantId.value)
+  if (assistant) {
+    await updateMessage(
+      {
+        content: assistant.content || '',
+      },
+      'system',
+    )
+  }
   // 保存输入信息
   await updateMessage(
     {
@@ -406,6 +487,7 @@ const updateMessage = async (
       createdAt: now,
       updatedAt: now,
       activeAt: now,
+      assistantId: selectedAssistantId.value,
     })
     newMessage = { ...newMessage, ...message, chatId }
     const chat = await db.chats.get(chatId)
@@ -502,9 +584,11 @@ watch(
 
 onMounted(async () => {
   modelGroups.value = await getModelGroups('chat')
+  assistants.value = await db.assistant.toArray()
   loadMessages()
   emitter.on(Events.DATA_CHANGE, async () => {
     modelGroups.value = await getModelGroups('chat')
+    assistants.value = await db.assistant.toArray()
     loadMessages()
   })
   scrollToBottom()

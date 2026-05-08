@@ -165,6 +165,7 @@ const handleDelete = async (row: IMapping) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
+      modalClass: '!z-3000',
     })
     if (row.id !== undefined) {
       await db.mappings.delete(row.id)

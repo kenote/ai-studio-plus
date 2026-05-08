@@ -337,6 +337,7 @@ const deleteGroup = async (row: Group) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
+      modalClass: '!z-3000',
     })
     await db.models.where('groupId').equals(row.id!).delete()
     await db.groups.delete(row.id)
@@ -350,6 +351,7 @@ const handleDelete = async (row: IProvider) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
+      modalClass: '!z-3000',
     })
     await db.groups.where('providerId').equals(row.id!).delete()
     await db.models.where('providerId').equals(row.id!).delete()

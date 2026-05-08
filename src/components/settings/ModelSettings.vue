@@ -286,6 +286,7 @@ const handleDelete = async (row: IModel) => {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
       type: 'warning',
+      modalClass: '!z-3000',
     })
     await db.models.delete(row.id!)
     loadData()
