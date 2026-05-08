@@ -29,7 +29,13 @@
       </div>
     </div>
     <div v-if="isThinking && openSearch" class="mb-2 text-sm text-coolgray">正在联网搜索...</div>
-    <el-alert v-if="error" :title="String(error)" type="error" show-icon :closable="false" />
+    <el-alert
+      v-if="error?.message || error?.name"
+      :title="String(error)"
+      type="error"
+      show-icon
+      :closable="false"
+    />
     <div v-else class="markdown-body" v-html="renderMarkdown(content)"></div>
     <el-dialog
       v-model="archiveDialogVisible"

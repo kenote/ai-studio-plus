@@ -423,7 +423,7 @@ const sendMessage = async (id?: number) => {
     const delta = await useChatStream(options, '/chat/completions', streamCallback(assistantId!))
     // 处理非流式请求返回结果
     if (delta) {
-      await updateMessage({ content: delta }, 'assistant', assistantId)
+      await updateMessage({ content: delta, error: undefined }, 'assistant', assistantId)
       isThinking.value = 0
     }
   } catch (error) {
@@ -455,7 +455,7 @@ const streamCallback = (assistantId: number) => {
     // 2. 节流写入数据库（避免频繁 IO）
     const now = Date.now()
     if (status === 'stop' || now - lastUpdateTime > UPDATE_INTERVAL) {
-      await updateMessage({ content: longContent }, 'assistant', assistantId)
+      await updateMessage({ content: longContent, error: undefined }, 'assistant', assistantId)
       lastUpdateTime = now
       if (status === 'stop') {
         isThinking.value = 0
