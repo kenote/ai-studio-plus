@@ -8,7 +8,9 @@
       <div
         class="position-absolute z-1 top-0 left-0 right-0 bottom-0 h-16 flex items-center justify-between bg-white dark:bg-[#1a1a1a]"
       >
-        <div class="w-[2px] pl-6"></div>
+        <div class="w-[100px] pl-6 text-xs text-zinc-400 truncate outline-none">
+          {{ assistants.find((a) => a.id === chat?.assistantId)?.name || '' }}
+        </div>
         <div
           v-if="chat?.id"
           class="truncate font-500 text-[18px] max-w-2xl cursor-text border border-transparent hover:border-blue-400 px-2 py-0.5 rounded outline-none"
@@ -20,7 +22,7 @@
           {{ chatName }}
         </div>
 
-        <div class="w-[20px] pr-6" v-if="chat?.id">
+        <div class="w-[100px] pr-6 flex flex-row-reverse" v-if="chat?.id">
           <el-popover
             placement="bottom-end"
             :width="320"
@@ -115,7 +117,6 @@
             :joplin="joplinConfig"
             :msg-id="msg.id"
             :error="msg.error"
-            :assistant="assistants.find((v) => v.id === chat?.assistantId)"
             @resend="handleResend"
           />
         </div>
@@ -210,7 +211,7 @@ import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
 import { useChatStream } from '@/composables/useChatStream'
-import { set, last } from 'lodash-es'
+import { set } from 'lodash-es'
 import { useRouter } from 'vue-router'
 import {
   loadImage,
@@ -370,16 +371,6 @@ const handleSend = async (evt?: Event | KeyboardEvent) => {
   }
   // 清除输入区
   clearValues()
-  // 保存助手提示词
-  const assistant = assistants.value.find((a) => a.id === selectedAssistantId.value)
-  if (assistant) {
-    await updateMessage(
-      {
-        content: assistant.content || '',
-      },
-      'system',
-    )
-  }
   // 保存输入信息
   await updateMessage(
     {
@@ -506,6 +497,26 @@ const updateMessage = async (
     set(updateMsg, 'content', message.content as string)
     set(updateMsg, 'createdAt', now)
   } else {
+    const assistant = assistants.value.find((a) => a.id === selectedAssistantId.value)
+    const systemMessage = await db.messages
+      .where('chatId')
+      .equals(newMessage.chatId!)
+      .filter((m) => m.role === 'system')
+      .first()
+    if (assistant && !systemMessage) {
+      await db.messages.add({
+        role: 'system',
+        content: assistant.content || '',
+        createdAt: now,
+        chatId: newMessage.chatId,
+      })
+    }
+    if (assistant && messages.value.find((v) => v.role === 'system') === undefined) {
+      messages.value.unshift({
+        role: 'system',
+        content: assistant.content || '',
+      })
+    }
     messageId = await db.messages.add(newMessage)
     messages.value.push({ ...newMessage, id: messageId })
   }
@@ -530,12 +541,13 @@ const loadMessages = async () => {
   }
   selectedModelId.value = props.chat.modelId
   messages.value = await db.messages.where('chatId').equals(props.chat?.id).sortBy('id')
+  openSearch.value = false
   // scrollToBottom()
   clearValues()
-  if (!last(messages.value)?.content) {
-    // 检查上次未完成请求
-    await sendMessage(last(messages.value)?.id)
-  }
+  // if (!last(messages.value.filter((v) => v.role === 'assistant'))?.content) {
+  //   // 检查上次未完成请求
+  //   await sendMessage(last(messages.value)?.id)
+  // }
 }
 
 /**

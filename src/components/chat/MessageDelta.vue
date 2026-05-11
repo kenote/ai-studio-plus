@@ -93,39 +93,16 @@
       ></el-tooltip>
     </div>
   </div>
-  <div
-    v-else-if="type === 'system' && msgId"
-    class="flex items-center justify-center text-sm my-4 w-full"
-  >
-    <!-- <div> -->
-    <!-- {{ assistant?.name || '' }} -->
-    <el-collapse class="w-[90%]">
-      <el-collapse-item name="1" icon="">
-        <template #title>
-          <div class="flex items-center gap-2">
-            <el-icon><UserFilled /></el-icon>
-            <span>{{ assistant?.name }}</span>
-          </div>
-        </template>
-        <!-- <div #title="{ isActive }" class="text-sm text-zinc-400 mb-2">{{ assistant?.name }}</div> -->
-        <div
-          class="markdown-body text-zinc-400 italic px-4"
-          v-html="String(assistant?.content).replace(/\n/g, '<br>')"
-        ></div>
-      </el-collapse-item>
-    </el-collapse>
-  </div>
-  <!-- </div> -->
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import type { ContentItem, ImageContent, Assistant } from '@/types/chat'
+import type { ContentItem, ImageContent } from '@/types/chat'
 import { formatDate } from '@/utils/message'
 import { marked, type Tokens } from 'marked'
 import hljs from 'highlight.js'
 import { isString, isArray, isEqual } from 'lodash-es'
-import { CopyDocument, RefreshRight, UserFilled } from '@element-plus/icons-vue'
+import { CopyDocument, RefreshRight } from '@element-plus/icons-vue'
 import { saveJoplin } from '@/utils/joplin'
 
 const props = withDefaults(
@@ -144,7 +121,6 @@ const props = withDefaults(
       folder?: string
     }
     archive?: boolean
-    assistant?: Assistant
   }>(),
   {
     modelName: '',

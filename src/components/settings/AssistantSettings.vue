@@ -26,7 +26,7 @@
           </div>
         </template>
         <div class="bg-coolgray-100 dark:bg-coolgray-700 p-2 rounded">
-          <div class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3">
+          <div class="text-xs text-zinc-600 dark:text-zinc-400 line-clamp-3 h-12">
             {{ row.content || '未设置' }}
           </div>
         </div>
@@ -62,6 +62,7 @@
 import { ref, onMounted } from 'vue'
 import { db } from '@/db'
 import type { Assistant as AssistantItem } from '@/types/chat'
+import { emitter, Events } from '@/utils/emitter'
 
 // interface AssistantItem extends Assistant {}
 
@@ -105,6 +106,7 @@ const saveAssistant = async () => {
   dialogVisible.value = false
   loadData()
   ElMessage.success('保存成功')
+  emitter.emit(Events.DATA_CHANGE)
 }
 
 const handleDelete = async (row: AssistantItem) => {
@@ -119,6 +121,7 @@ const handleDelete = async (row: AssistantItem) => {
       await db.assistant.delete(row.id)
     }
     loadData()
+    emitter.emit(Events.DATA_CHANGE)
   } catch {}
 }
 

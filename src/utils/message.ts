@@ -140,12 +140,12 @@ export function formatDate(value: number) {
  */
 export async function getSearchContent(msgs: Message[], openSearch: boolean = false) {
   if (!openSearch) return []
-  const lsatContent = last(msgs)?.content
+  const lastContent = last(msgs)?.content
   let query = ''
-  if (isString(lsatContent)) {
-    query = lsatContent
-  } else if (isArray(lsatContent)) {
-    query = lsatContent.find((v) => v.type === 'text')?.text ?? ''
+  if (isString(lastContent)) {
+    query = lastContent
+  } else if (isArray(lastContent)) {
+    query = lastContent.find((v) => v.type === 'text')?.text ?? ''
   }
   const results = await useSearchContent(query, 5)
   if (results.length > 0) {
