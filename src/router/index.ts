@@ -20,6 +20,12 @@ const router = createRouter({
       meta: { layout: LayoutPanel },
     },
     {
+      path: '/translate',
+      name: 'translate',
+      component: () => import('@/views/TranslateView.vue'),
+      meta: { layout: LayoutPanel },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/NotFoundView.vue'),

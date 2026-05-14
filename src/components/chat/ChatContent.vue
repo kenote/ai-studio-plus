@@ -59,6 +59,7 @@
             v-if="assistants.length > 0"
             ref="assistantDropdownRef"
             trigger="click"
+            placement="bottom-end"
             @command="handleAssistantCommand"
           >
             <span class="el-dropdown-link">
@@ -84,9 +85,9 @@
                       ? 'border-blue-400 bg-blue-50 dark:bg-blue-900/20'
                       : ''
                   "
-                  @click="handleAssistantCommand(assistant.id)"
+                  @click="handleAssistantCommand(assistant.id!)"
                 >
-                  <div class="font-medium">{{ assistant.name }}</div>
+                  <div class="font-medium">{{ assistant.name || '' }}</div>
                   <div v-if="assistant.content" class="text-xs text-zinc-500 mt-1 line-clamp-2">
                     {{ assistant.content }}
                   </div>

@@ -3,6 +3,7 @@
     :model-value="modelValue"
     placeholder="选择模型"
     class="w-50"
+    :placement="placement"
     @update:model-value="onChange"
   >
     <el-option-group v-for="group in modelGroups" :key="group.groupName" :label="group.groupName">
@@ -23,6 +24,19 @@ import type { ModelGroup } from '@/types/provider'
 defineProps<{
   modelValue?: number
   modelGroups?: ModelGroup[]
+  placement?:
+    | 'top'
+    | 'top-start'
+    | 'top-end'
+    | 'bottom'
+    | 'bottom-start'
+    | 'bottom-end'
+    | 'left'
+    | 'left-start'
+    | 'left-end'
+    | 'right'
+    | 'right-start'
+    | 'right-end'
 }>()
 
 const emit = defineEmits<{

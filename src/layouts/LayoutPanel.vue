@@ -1,6 +1,7 @@
 <template>
-  <el-container class="h-full">
+  <el-container class="h-full" :direction="direction">
     <el-header
+      v-if="direction === 'vertical'"
       class="flex items-center border-coolgray-300 border-b-solid border-b bg-white dark:bg-zinc-900 dark:border-zinc-800"
     >
       <nav class="flex items-center h-12 w-stretch">
@@ -23,7 +24,7 @@
             <img src="/logo.svg" class="h-10 w-10 dark:invert" alt="AI Studio" />
           </router-link>
           <!--  -->
-          <app-navbar class="ml-2" />
+          <app-navbar class="ml-2" :direction="direction" />
         </div>
 
         <div class="flex flex-2 items-center justify-center">
@@ -31,6 +32,56 @@
         </div>
         <div class="flex flex-1 items-center justify-end">
           <!-- <slot name="right"></slot> -->
+          <span
+            @click="openSettings"
+            title="配置"
+            class="font-900 p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="{2}"
+                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="{2}"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+          </span>
+        </div>
+      </nav>
+    </el-header>
+    <el-header
+      v-else-if="direction === 'horizontal'"
+      height="100%"
+      class="w-15 !p-0 border-coolgray-300 border-r-solid border-r bg-white dark:bg-zinc-900 dark:border-zinc-800"
+    >
+      <nav class="flex items-center flex-col justify-between h-full w-full">
+        <div class="flex items-center mt-4 flex-col">
+          <span
+            v-if="route?.path !== '/'"
+            @click="toggleSidebar"
+            class="px-2 py-1 mb-2 text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm cursor-pointer"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                :stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </span>
+          <router-link to="/" class="flex items-center">
+            <img src="/logo.svg" class="h-10 w-10 dark:invert" alt="AI Studio" />
+          </router-link>
+          <app-navbar class="ml-2" :direction="direction" />
+        </div>
+        <div class="flex items-center mb-4 flex-col">
           <span
             @click="openSettings"
             title="配置"
@@ -161,6 +212,7 @@ const providerCount = ref(0)
 const modelCount = ref(0)
 const isDark = usePreferredDark()
 const route = useRoute()
+const direction = ref<'horizontal' | 'vertical'>('horizontal')
 
 const toggleSidebar = () => {
   emitter.emit(Events.TOGGLE_SIDEBAR)

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import TheWelcome from '@/components/TheWelcome.vue'
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+// import { useRouter } from 'vue-router'
 
-const router = useRouter()
+// const router = useRouter()
 
 onMounted(() => {
-  router.push('/chat')
+  // router.push('/chat')
 })
 </script>
 

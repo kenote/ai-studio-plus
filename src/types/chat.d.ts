@@ -4,6 +4,8 @@ import { ModelInfo } from './provider'
 export declare interface AIRequest extends ModelInfo {
   messages: Pick<Message, 'role' | 'content'>[]
   stream?: boolean
+  // temperature?: number
+  [key: string]: unknown
 }
 
 /** 聊天会话 */

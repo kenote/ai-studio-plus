@@ -7,13 +7,18 @@ import type { Component, PageContext, PageProps } from './types'
 
 export { createApp }
 
+// oxlint-disable-next-line no-unused-vars
 function createApp(Page: Component, pageProps: PageProps | undefined, pageContext: PageContext) {
   const PageWithLayout = defineComponent({
     render() {
-      return h(PageShell, {}, {
-        default: () => h(Page, pageProps || {})
-      })
-    }
+      return h(
+        PageShell,
+        {},
+        {
+          default: () => h(Page, pageProps || {}),
+        },
+      )
+    },
   })
 
   const app = createSSRApp(PageWithLayout)

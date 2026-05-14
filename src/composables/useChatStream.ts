@@ -5,7 +5,7 @@ export async function useChatStream(
   entrance: string,
   callback?: (content: string, status: string) => void,
 ): Promise<string | void> {
-  const { apiBase, apiKey, modelName, messages, stream } = options
+  const { apiBase, apiKey, modelName, messages, stream, temperature } = options
 
   const response = await fetch(apiBase + entrance, {
     method: 'POST',
@@ -17,6 +17,7 @@ export async function useChatStream(
       model: modelName,
       messages,
       stream,
+      temperature,
     }),
   })
   if (!response.ok) throw new Error(`请求失败: ${response.status}`)
