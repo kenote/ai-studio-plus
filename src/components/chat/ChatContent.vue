@@ -212,7 +212,7 @@ import { getModelFullName, getModelGroups } from '@/db/model'
 import type { ModelGroup } from '@/types/provider'
 import { emitter, Events } from '@/utils/emitter'
 import { useChatStream } from '@/composables/useChatStream'
-import { set } from 'lodash-es'
+import { set, cloneDeep } from 'lodash-es'
 import { useRouter } from 'vue-router'
 import {
   loadImage,
@@ -397,7 +397,7 @@ const sendMessage = async (id?: number) => {
   let assistantId = id
   try {
     const index = id ? messages.value.findIndex((item) => item.id === id) : -1
-    const msgs = id ? messages.value.slice(0, index) : messages.value
+    const msgs = cloneDeep(id ? messages.value.slice(0, index) : messages.value)
     // 联网搜索
     await getSearchContent(msgs, openSearch.value)
     // 获取请求参数
@@ -542,7 +542,7 @@ const loadMessages = async () => {
   }
   selectedModelId.value = props.chat.modelId
   messages.value = await db.messages.where('chatId').equals(props.chat?.id).sortBy('id')
-  openSearch.value = false
+  // openSearch.value = false
   // scrollToBottom()
   clearValues()
   // if (!last(messages.value.filter((v) => v.role === 'assistant'))?.content) {
@@ -590,6 +590,9 @@ watch(
     if (value === oldValue) return
     loadMessages()
     scrollToBottom()
+    if (!value) {
+      openSearch.value = false
+    }
   },
 )
 watch(
