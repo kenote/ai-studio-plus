@@ -1,5 +1,5 @@
 <template>
-  <div class="chat-content h-full flex flex-col !overflow-x-auto min-w-3xl">
+  <div v-if="selectedModelId" class="chat-content h-full flex flex-col !overflow-x-auto min-w-3xl">
     <el-scrollbar
       ref="scrollbarRef"
       class="flex-1 !overflow-y-auto !overflow-x-hidden w-full position-relative"
@@ -162,6 +162,7 @@
               </el-button>
 
               <el-check-tag
+                v-if="searchEnabled"
                 :checked="openSearch"
                 class="!px-[8px] !py-[7px] !text-[18px] !bg-transparent hover:!bg-zinc-200 dark:hover:!bg-zinc-700"
                 @change="openSearch = !openSearch"
@@ -200,6 +201,7 @@
       </div>
     </div>
   </div>
+  <not-setting v-else />
 </template>
 
 <script setup lang="ts">
@@ -222,7 +224,8 @@ import {
   type ImageFile,
 } from '@/utils/message'
 import MessageDelta from './MessageDelta.vue'
-import { getChatName } from '@/db/chat'
+import { getChatName, isSearchSettings } from '@/db/chat'
+import NotSetting from './NotSetting.vue'
 
 const router = useRouter()
 
@@ -269,6 +272,7 @@ const stream = ref<boolean>(true)
 const isThinking = ref<number>(0)
 const chatName = ref('')
 const openSearch = ref<boolean>(false)
+const searchEnabled = ref<boolean>(false)
 const joplinConfig = ref<{
   host?: string
   token: string
@@ -606,10 +610,12 @@ watch(
 onMounted(async () => {
   modelGroups.value = await getModelGroups('chat')
   assistants.value = await db.assistant.toArray()
+  searchEnabled.value = await isSearchSettings()
   loadMessages()
   emitter.on(Events.DATA_CHANGE, async () => {
     modelGroups.value = await getModelGroups('chat')
     assistants.value = await db.assistant.toArray()
+    searchEnabled.value = await isSearchSettings()
     loadMessages()
   })
   scrollToBottom()

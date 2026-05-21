@@ -57,6 +57,7 @@ declare module 'vue' {
     ModelSelect: typeof import('./components/chat/ModelSelect.vue')['default']
     ModelSettings: typeof import('./components/settings/ModelSettings.vue')['default']
     NameFilterSettings: typeof import('./components/settings/NameFilterSettings.vue')['default']
+    NotSetting: typeof import('./components/chat/NotSetting.vue')['default']
     ProviderSettings: typeof import('./components/settings/ProviderSettings.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

@@ -24,3 +24,15 @@ export async function getChatName(chat: Chat, defaultName: string = '新会话')
     return defaultName
   }
 }
+
+export async function isSearchSettings() {
+  const config = await db.config.get(1)
+  if (config?.search?.type === 'tavily') {
+    const { host, token } = config.search.tavily
+    return !!host && !!token
+  } else if (config?.search?.type === 'searxng') {
+    const host = config.search.searxng
+    return !!host
+  }
+  return false
+}

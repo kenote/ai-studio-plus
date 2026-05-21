@@ -122,6 +122,7 @@ watch(
   () => props.modelVisible,
   async (val) => {
     visible.value = val
+    searchText.value = ''
     if (val && props.groupId) {
       await loadData()
       await fetchRemoteModels()
@@ -167,8 +168,10 @@ const fetchRemoteModels = async () => {
     const pattern =
       filterTable.value.find((v) => v.name == currentGroup?.name.toLowerCase())?.pattern ??
       `^(${fillterName})`
-    const data =
-      (<RemoteModel[]>response.data.data).filter((v) => new RegExp(pattern, 'i')?.test(v.id)) || []
+    const data = ['通用', 'general', '默认', 'default'].includes(currentGroup.name.toLowerCase())
+      ? <RemoteModel[]>response.data.data
+      : (<RemoteModel[]>response.data.data).filter((v) => new RegExp(pattern, 'i')?.test(v.id)) ||
+        []
     remoteModels.value = orderBy(
       data.map((m: { id: string }) => ({
         id: 0,

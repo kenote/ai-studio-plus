@@ -302,6 +302,7 @@ const exportData = async () => {
     config: await db.config.toArray(),
     filters: await db.filters.toArray(),
     mappings: await db.mappings.toArray(),
+    assistant: await db.assistant.toArray(),
   }
   const json = JSON.stringify(data, null, 2)
   const fileName = `ai-studio-plus-backup-${new Date().toISOString().slice(0, 10)}.json`
@@ -370,6 +371,7 @@ const handleFileChange = async (event: Event) => {
         db.config,
         db.filters,
         db.mappings,
+        db.assistant,
       ],
       async () => {
         await db.providers.clear()
@@ -380,6 +382,7 @@ const handleFileChange = async (event: Event) => {
         await db.config.clear()
         await db.filters.clear()
         await db.mappings.clear()
+        await db.assistant.clear()
 
         if (data.providers?.length) await db.providers.bulkAdd(data.providers)
         if (data.groups?.length) await db.groups.bulkAdd(data.groups)
@@ -389,6 +392,7 @@ const handleFileChange = async (event: Event) => {
         if (data.config?.length) await db.config.bulkAdd(data.config)
         if (data.filters?.length) await db.filters.bulkAdd(data.filters)
         if (data.mappings?.length) await db.mappings.bulkAdd(data.mappings)
+        if (data.assistant?.length) await db.assistant.bulkAdd(data.assistant)
       },
     )
 
@@ -412,6 +416,7 @@ const clearData = async () => {
         cancelButtonText: '取消',
         type: 'warning',
         confirmButtonClass: 'el-button--danger',
+        modalClass: '!z-3000',
       },
     )
     await db.transaction(
@@ -425,6 +430,7 @@ const clearData = async () => {
         db.config,
         db.filters,
         db.mappings,
+        db.assistant,
       ],
       async () => {
         await db.providers.clear()
@@ -435,6 +441,7 @@ const clearData = async () => {
         await db.config.clear()
         await db.filters.clear()
         await db.mappings.clear()
+        await db.assistant.clear()
       },
     )
     ElMessage.success('数据已清除')

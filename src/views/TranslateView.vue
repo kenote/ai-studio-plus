@@ -10,6 +10,7 @@ import { marked } from 'marked'
 import { useChatStream } from '@/composables/useChatStream'
 import type { AIRequest } from '@/types/chat'
 import type { InputInstance } from 'element-plus'
+import NotSetting from '@/components/chat/NotSetting.vue'
 
 const langs = [
   '🇨🇳 简体中文',
@@ -224,7 +225,7 @@ watch(
 </script>
 
 <template>
-  <el-container class="h-full">
+  <el-container v-if="selectedModelId" class="h-full">
     <el-header class="flex flex-row items-center justify-between">
       <div>
         <el-select v-model="sourceLang" placeholder="请选择" style="width: 150px" class="mr-4">
@@ -259,7 +260,7 @@ watch(
           >保存译文</el-button
         >
       </div>
-      <div class="w-[300px] flex flex-row items-center justify-end">
+      <div class="w-[300px] flex flex-row items-center justify-end mt-2">
         <div class="w-[200px]">
           <ModelSelect
             v-model="selectedModelId"
@@ -340,6 +341,7 @@ watch(
       </template>
     </el-dialog>
   </el-container>
+  <not-setting v-else />
 </template>
 
 <style scoped>

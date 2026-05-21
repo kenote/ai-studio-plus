@@ -33,7 +33,7 @@
         <div class="flex flex-1 items-center justify-end">
           <!-- <slot name="right"></slot> -->
           <span
-            @click="openSettings"
+            @click="() => openSettings()"
             title="配置"
             class="font-900 p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm"
           >
@@ -83,7 +83,7 @@
         </div>
         <div class="flex items-center mb-4 flex-col">
           <span
-            @click="openSettings"
+            @click="() => openSettings()"
             title="配置"
             class="font-900 p-[4px_8px] text-zinc-950 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-sm"
           >
@@ -223,8 +223,8 @@ const loadCounts = async () => {
   modelCount.value = await db.models.count()
 }
 
-const openSettings = async () => {
-  activeMenu.value = 'general'
+const openSettings = async (tag: string = 'general') => {
+  activeMenu.value = tag
   showSettings.value = true
   await loadCounts()
 }
@@ -238,13 +238,20 @@ const applyTheme = async () => {
   }
 }
 
+const handleOpenSettings = (payload: unknown) => {
+  const tag = (payload as { tag?: string } | undefined)?.tag
+  openSettings(tag)
+}
+
 onMounted(() => {
   applyTheme()
   emitter.on(Events.DATA_CHANGE, loadCounts)
+  emitter.on(Events.OPEN_SETTINGS, handleOpenSettings)
 })
 
 onUnmounted(() => {
   emitter.off(Events.DATA_CHANGE, loadCounts)
+  emitter.off(Events.OPEN_SETTINGS, handleOpenSettings)
 })
 
 watch(isDark, async (newVal) => {

@@ -7,4 +7,5 @@ export const Events = {
   DATA_CHANGE: 'data-change',
   TOGGLE_SIDEBAR: 'toggle-sidebar',
   CHAT_CHANGE: 'chat-change',
+  OPEN_SETTINGS: 'open-settings',
 } as const
